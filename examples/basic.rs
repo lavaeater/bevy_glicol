@@ -6,7 +6,7 @@ fn main() {
         .add_plugins((DefaultPlugins, GlicolPlugin))
         .insert_resource(Vol(0.5))
         .add_systems(Update, play_tone)
-        .run()
+        .run();
 }
 
 #[derive(Resource)]

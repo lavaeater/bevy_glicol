@@ -7,7 +7,7 @@ edition = "2021"
 
 [dependencies]
 anyhow = "1.0.82"
-bevy = "0.13.2"
+bevy = "0.15"
 cpal = "0.15.3"
 glicol = "0.13.5"
 glicol_synth = "0.13.5"
