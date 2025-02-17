@@ -3827,16 +3827,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "glicol-wasm"
-version = "0.1.0"
-dependencies = [
- "glicol",
- "lazy_static",
- "pest",
- "wasm-bindgen",
-]
-
-[[package]]
 name = "glicol_parser"
 version = "0.1.0-dev"
 dependencies = [
