@@ -9,27 +9,14 @@ use std::{
     thread,
 };
 
-#[cfg(target_arch = "wasm32")]
-use wasm_bindgen::prelude::*;
-#[cfg(target_arch = "wasm32")]
-use wasm_bindgen::JsValue;
-#[cfg(target_arch = "wasm32")]
-use web_sys::js_sys;
-#[cfg(target_arch = "wasm32")]
-use web_sys::window;
-
 const BLOCK_SIZE: usize = 128;
 
 #[derive(Resource)]
 pub struct GlicolEngine {
-    #[cfg(not(target_arch = "wasm32"))]
     pub engine: Arc<Mutex<glicol::Engine<128>>>,
-    #[cfg(target_arch = "wasm32")]
-    pub code: String,
 }
 
 impl GlicolEngine {
-    #[cfg(not(target_arch = "wasm32"))]
     pub fn new() -> Self {
         let engine = Arc::new(Mutex::new(glicol::Engine::<BLOCK_SIZE>::new()));
         let host = cpal::default_host();
@@ -49,42 +36,14 @@ impl GlicolEngine {
         Self { engine }
     }
 
-    // if target is not wasm 32
-    #[cfg(not(target_arch = "wasm32"))]
     pub fn update_with_code(&self, code: &str) {
         let mut engine = self.engine.lock();
-        engine.update_with_code(code);
-    }
-
-    // for wasm
-    #[cfg(target_arch = "wasm32")]
-    pub fn new() -> Self {
-        let code = "o: noise 42 >> mul 0.1".to_string();
-        Self { code }
-    }
-
-    #[cfg(target_arch = "wasm32")]
-    pub fn update_with_code(&self, code: &str) {
-        // self.code = code.to_string();
-        // info!("update_with_code: {code}");
-
-        use web_sys::js_sys::Function;
-        if let Some(win) = window() {
-            let run = win
-                .get("run")
-                .expect("should have run as a property or method");
-
-            let run_function = run.dyn_into::<Function>();
-            if let Ok(run_function) = run_function {
-                let this = JsValue::NULL;
-                let code = JsValue::from_str(code);
-                let _ = run_function.call1(&this, &code);
-            }
+        if let Err(e) = engine.update_with_code(code) {
+            error!("Failed to update Glicol code: {}", e);
         }
     }
 }
 
-#[cfg(not(target_arch = "wasm32"))]
 fn run_audio<T>(
     device: &cpal::Device,
     config: &cpal::StreamConfig,
@@ -137,15 +96,8 @@ where
             prev_block_pos = BLOCK_SIZE;
             while writes < block_step {
                 let mut e = engine_clone.lock();
-                let (block, raw_err) = e.next_block(vec![]);
-                if raw_err[0] != 0 {
-                    let raw_msg = Vec::from(&raw_err[1..]);
-                    match String::from_utf8(raw_msg) {
-                        Ok(msg) => error!("get next block of engine: {msg}"),
-                        Err(e) => error!("got error from engine but unable to decode it: {e}"),
-                    }
-                }
-
+                let block = e.next_block(vec![]);
+                
                 if writes + BLOCK_SIZE <= block_step {
                     for i in 0..BLOCK_SIZE {
                         write_samples(block, writes, i);
