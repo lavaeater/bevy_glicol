@@ -551,7 +551,7 @@ dependencies = [
  "derive_more",
  "downcast-rs",
  "either",
- "petgraph",
+ "petgraph 0.6.5",
  "ron",
  "serde",
  "smallvec",
@@ -747,7 +747,7 @@ dependencies = [
  "disqualified",
  "fixedbitset 0.5.7",
  "nonmax",
- "petgraph",
+ "petgraph 0.6.5",
  "serde",
  "smallvec",
 ]
@@ -1155,7 +1155,7 @@ dependencies = [
  "downcast-rs",
  "erased-serde",
  "glam",
- "petgraph",
+ "petgraph 0.6.5",
  "serde",
  "smallvec",
  "smol_str",
@@ -3814,7 +3814,7 @@ dependencies = [
 
 [[package]]
 name = "glicol"
-version = "0.14.0-dev"
+version = "0.1.0-dev"
 dependencies = [
  "anyhow",
  "glicol_parser",
@@ -3822,7 +3822,7 @@ dependencies = [
  "gnuplot",
  "hashbrown 0.15.2",
  "pest",
- "petgraph",
+ "petgraph 0.7.1",
  "yoke",
 ]
 
@@ -3838,7 +3838,7 @@ dependencies = [
 
 [[package]]
 name = "glicol_parser"
-version = "0.14.0-dev"
+version = "0.1.0-dev"
 dependencies = [
  "fasteval",
  "hashbrown 0.15.2",
@@ -3850,7 +3850,7 @@ dependencies = [
 
 [[package]]
 name = "glicol_synth"
-version = "0.14.0-dev"
+version = "0.1.0-dev"
 dependencies = [
  "criterion",
  "dasp_interpolate",
@@ -3861,7 +3861,7 @@ dependencies = [
  "glicol_parser",
  "gnuplot",
  "hashbrown 0.15.2",
- "petgraph",
+ "petgraph 0.7.1",
  "rhai",
 ]
 
@@ -5486,6 +5486,16 @@ dependencies = [
  "indexmap",
  "serde",
  "serde_derive",
+]
+
+[[package]]
+name = "petgraph"
+version = "0.7.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3672b37090dbd86368a4145bc067582552b29c27377cad4e0a306c97f9bd7772"
+dependencies = [
+ "fixedbitset 0.5.7",
+ "indexmap",
 ]
 
 [[package]]

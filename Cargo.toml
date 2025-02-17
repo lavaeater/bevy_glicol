@@ -4,13 +4,13 @@ members = ["main", "parser", "synth", "wasm", "bevy_glicol", "tui_glicol"]
 resolver = "1"
 
 [workspace.package]
-version = "0.14.0-dev"
+version = "0.1.0-dev"
 edition = "2021"
-repository = "https://github.com/chaosprint/glicol.git"
-authors = ["Qichao Lan <chaosprint@gmail.com>"]
+repository = "https://github.com/lavaeater/bevy_glicol"
+authors = ["Tommie Nygren <tommie.nygren@gmail.com>", "Qichao Lan <chaosprint@gmail.com>"]
 
 [workspace.dependencies]
-petgraph = { version = "0.6", default-features = false,  features = ["stable_graph"] }
+petgraph = { version = "0.7.1", default-features = false,  features = ["stable_graph"] }
 dasp_slice = { version = "0.11.0", default-features = false, features = [
     "std",
 ] }
