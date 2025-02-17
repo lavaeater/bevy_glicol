@@ -2742,6 +2742,10 @@ dependencies = [
 ]
 
 [[package]]
+name = "glicol_tui"
+version = "0.14.0-dev"
+
+[[package]]
 name = "glob"
 version = "0.3.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
