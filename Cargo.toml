@@ -1,22 +1,38 @@
-[package]
-name = "bevy_glicol"
-version = "0.1.0"
+[workspace]
+default-members = ["main"]
+members = ["main", "parser", "synth", "wasm", "bevy_glicol"]
+resolver = "1"
+
+[workspace.package]
+version = "0.14.0-dev"
 edition = "2021"
+repository = "https://github.com/chaosprint/glicol.git"
+authors = ["Qichao Lan <chaosprint@gmail.com>"]
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[workspace.dependencies]
+petgraph = { version = "0.6", default-features = false,  features = ["stable_graph"] }
+dasp_slice = { version = "0.11.0", default-features = false, features = [
+    "std",
+] }
 
-[dependencies]
-anyhow = "1.0.82"
-bevy = "0.13.2"
-cpal = "0.15.3"
-glicol = "0.13.5"
-glicol_synth = "0.13.5"
-parking_lot = "0.12.2"
+dasp_ring_buffer = { version = "0.11.0", default-features = false }
+# default-features = false can't be used here; we need std
+dasp_signal = { version = "0.11.0" }
+dasp_interpolate = { version = "0.11.0", features = ["linear", "sinc"] }
+hashbrown = "0.15.2"
+rhai = { version = "1.12.0", default-features = false, features = [
+    "sync",
+    "f32_float",
+    "only_i32",
+] }
+fasteval = "0.2.4"
+pest = "2.7.9"
+pest_derive = "2.7.9"
+yoke = { version = "0.7.3", default-features = false, features = ["derive", "alloc"] }
 
-
-[target.'cfg(target_arch = "wasm32")'.dependencies]
-wasm-bindgen = "0.2.92"
-web-sys = "0.3.69"
-
-[dev-dependencies]
-bevy_egui = "0.27.0"
+[profile.wasm-release]
+inherits = "release"
+opt-level = 'z'   # Optimize for size.
+lto = "fat"       # Enable Link Time Optimization
+codegen-units = 1 # Reduce number of codegen units to increase optimizations.
+panic = 'abort'   # Abort on panic
