@@ -24,7 +24,12 @@ glicol_parser = { path = "../parser" }
 glicol_synth = { path = "../synth", features = [
     "use-samples",
     "use-meta",
-] }
+    "node-boxed",
+    "node-pass",
+    "node-sampling",
+    "node-dynamic",
+    "node-sum",
+], default-features = true }
 pest = { workspace = true }
 hashbrown = { workspace = true }
 yoke = { workspace = true }

@@ -3,17 +3,21 @@ use crossterm::event::KeyEvent;
 use ratatui::prelude::Rect;
 use serde::{Deserialize, Serialize};
 use tokio::sync::mpsc;
-use tracing::{debug, info};
+use tracing::{debug, info, error};
 use glicol::Engine;
 use cpal::traits::{DeviceTrait, HostTrait, StreamTrait};
 use std::sync::{Arc, Mutex};
 
 use crate::{
     action::Action,
-    components::{fps::FpsCounter, home::Home, graph::GraphComponent, Component},
+    components::{fps::FpsCounter, home::Home, graph::GraphComponent, log_display::LogDisplay, Component},
     config::Config,
     tui::{Event, Tui},
 };
+
+
+const SPECIAL: &str = include_str!("../.config/synth.txt");
+
 
 pub struct App {
     config: Config,
@@ -29,6 +33,7 @@ pub struct App {
     engine: Arc<Mutex<Engine<512>>>,
     stream: Option<cpal::Stream>,
     graph_component: GraphComponent<512>,
+    log_display: LogDisplay,
 }
 
 #[derive(Default, Debug, Copy, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
@@ -51,6 +56,7 @@ impl App {
             tick_rate,
             frame_rate,
             components: vec![Box::new(Home::new()), Box::new(FpsCounter::default()), Box::new(graph_component.clone())],
+            log_display: LogDisplay::default(),
             should_quit: false,
             should_suspend: false,
             config: Config::new()?,
@@ -151,6 +157,7 @@ impl App {
             if action != Action::Tick && action != Action::Render {
                 debug!("{action:?}");
             }
+            let action_for_components = action.clone();
             match action {
                 Action::Tick => {
                     self.last_tick_key_events.drain(..);
@@ -169,16 +176,28 @@ impl App {
                 },
                 Action::UpdateAudioCode(code) => {
                     if let Ok(mut engine) = self.engine.lock() {
-                        if let Ok(_) = engine.update_with_code(&code) {
+                        if engine.update_with_code(&code).is_ok() {
                             self.graph_component.set_engine(self.engine.clone());
+                        }
+                    }
+                },
+                Action::SpecialAudio => {
+                    if let Ok(mut engine) = self.engine.lock() {
+                        match engine.update_with_code(&SPECIAL) {
+                            Ok(_) => self.graph_component.set_engine(self.engine.clone()),
+                            Err(e) => {
+                                let err_msg = format!("Failed to update SPECIAL Glicol code: {e}");
+                                error!("{err_msg}");
+                                self.log_display.add_error(err_msg);
+                            }
                         }
                     }
                 },
                 _ => {}
             }
             for component in self.components.iter_mut() {
-                if let Some(action) = component.update(action.clone())? {
-                    self.action_tx.send(action)?
+                if let Some(new_action) = component.update(action_for_components.clone())? {
+                    self.action_tx.send(new_action)?
                 };
             }
         }
@@ -193,12 +212,26 @@ impl App {
 
     fn render(&mut self, tui: &mut Tui) -> Result<()> {
         tui.draw(|frame| {
+            let area = frame.area();
+            let graph_area = Rect::new(0, 0, area.width, area.height - 6);
+            let log_area = Rect::new(0, area.height - 6, area.width, 6);
+            
             for component in self.components.iter_mut() {
-                if let Err(err) = component.draw(frame, frame.area()) {
-                    let _ = self
-                        .action_tx
-                        .send(Action::Error(format!("Failed to draw: {:?}", err)));
+                if let Err(err) = component.draw(frame, graph_area) {
+                    let err_msg = format!("Failed to draw: {:?}", err);
+                    self.log_display.add_error(err_msg.clone());
+                    let _ = self.action_tx.send(Action::Error(err_msg));
                 }
+            }
+            
+            if let Err(err) = self.graph_component.draw(frame, graph_area) {
+                let err_msg = format!("Failed to draw graph: {:?}", err);
+                self.log_display.add_error(err_msg.clone());
+                let _ = self.action_tx.send(Action::Error(err_msg));
+            }
+            
+            if let Err(err) = self.log_display.draw(frame, log_area) {
+                let _ = self.action_tx.send(Action::Error(format!("Failed to draw logs: {:?}", err)));
             }
         })?;
         Ok(())
@@ -206,8 +239,15 @@ impl App {
 
     fn setup_audio(&mut self) -> Result<()> {
         let host = cpal::default_host();
-        let device = host.default_output_device()
-            .ok_or_else(|| color_eyre::eyre::eyre!("No output device found"))?;
+        let device = match host.default_output_device() {
+            Some(device) => device,
+            None => {
+                let err_msg = "No output device found";
+                tracing::error!("{err_msg}");
+                self.log_display.add_error(err_msg.to_string());
+                return Err(color_eyre::eyre::eyre!(err_msg));
+            }
+        };
         
         let config = device.default_output_config()?
             .config();
@@ -217,16 +257,20 @@ impl App {
             &config,
             move |data: &mut [f32], _: &cpal::OutputCallbackInfo| {
                 if let Ok(mut engine) = engine.lock() {
+                    // Process the next block
                     let empty_buffer = [0.0f32; 512];
-                    let mut input_buffers = vec![&empty_buffer[..]; 8];
-                    engine.context.processor.process(&mut engine.context.graph, engine.context.destination);
-                    let output = &engine.context.graph[engine.context.destination].buffers;
+                    let input_buffers = vec![&empty_buffer[..]; 8];
+                    let output = engine.next_block(input_buffers);
+                    // Copy the output data
                     for (i, sample) in data.iter_mut().enumerate() {
                         *sample = output[0][i % 512];
                     }
                 }
             },
-            |err| eprintln!("Audio stream error: {}", err),
+            |err| {
+                tracing::error!("Audio stream error: {}", err);
+                eprintln!("Audio stream error: {}", err);
+            },
             None
         )?;
         

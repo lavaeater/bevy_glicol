@@ -13,6 +13,8 @@ use tracing::error;
 
 use crate::{action::Action, app::Mode};
 
+
+
 const CONFIG: &str = include_str!("../.config/config.json5");
 
 #[derive(Clone, Debug, Deserialize, Default)]

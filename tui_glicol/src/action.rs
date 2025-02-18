@@ -13,6 +13,7 @@ pub enum Action {
     Error(String),
     Help,
     UpdateAudioCode(String),
+    SpecialAudio,
     PlayAudio,
     StopAudio,
 }
