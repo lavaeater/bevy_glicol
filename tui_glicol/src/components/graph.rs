@@ -1,4 +1,4 @@
-use std::sync::Arc;
+use std::sync::{Arc, Mutex};
 use color_eyre::Result;
 use ratatui::{
     layout::{Constraint, Direction, Layout, Rect},
@@ -6,26 +6,26 @@ use ratatui::{
     widgets::{Block, Borders, Paragraph},
     Frame,
 };
-use glicol_synth::AudioContext;
+use glicol::Engine;
 
 use crate::components::Component;
 
-#[derive(Clone, Debug)]
+#[derive(Clone)]
 pub struct GraphComponent<const N: usize> {
-    context: Option<Arc<AudioContext<N>>>,
+    engine: Option<Arc<Mutex<Engine<N>>>>,
     title: String,
 }
 
 impl<const N: usize> GraphComponent<N> {
     pub fn new() -> Self {
         Self {
-            context: None,
+            engine: None,
             title: "Glicol Graph".to_string(),
         }
     }
 
-    pub fn set_context(&mut self, context: Arc<AudioContext<N>>) {
-        self.context = Some(context);
+    pub fn set_engine(&mut self, engine: Arc<Mutex<Engine<N>>>) {
+        self.engine = Some(engine);
     }
 }
 
@@ -53,10 +53,14 @@ impl<const N: usize> Component for GraphComponent<N> {
             .borders(Borders::ALL)
             .style(Style::default());
 
-        let content = match &self.context {
-            Some(context) => {
-                // For now, just display a simple representation
-                format!("Graph with {} nodes", context.graph.node_count())
+        let content = match &self.engine {
+            Some(engine) => {
+                if let Ok(engine) = engine.lock() {
+                    // For now, just display a simple representation
+                    format!("Graph with {} nodes", engine.context.graph.node_count())
+                } else {
+                    "Error accessing graph".to_string()
+                }
             }
             None => "No graph loaded".to_string(),
         };

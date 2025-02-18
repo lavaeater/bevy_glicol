@@ -6,7 +6,7 @@ use tokio::sync::mpsc;
 use tracing::{debug, info};
 use glicol::Engine;
 use cpal::traits::{DeviceTrait, HostTrait, StreamTrait};
-use std::sync::Arc;
+use std::sync::{Arc, Mutex};
 
 use crate::{
     action::Action,
@@ -26,7 +26,7 @@ pub struct App {
     last_tick_key_events: Vec<KeyEvent>,
     action_tx: mpsc::UnboundedSender<Action>,
     action_rx: mpsc::UnboundedReceiver<Action>,
-    engine: Engine<512>,
+    engine: Arc<Mutex<Engine<512>>>,
     stream: Option<cpal::Stream>,
     graph_component: GraphComponent<512>,
 }
@@ -43,8 +43,10 @@ impl App {
         
         let mut engine = Engine::<512>::new();
         engine.update_with_code(r#"out: saw 440.0 >> mul 0.1"#).unwrap();
+        let engine = Arc::new(Mutex::new(engine));
         
-        let graph_component = GraphComponent::new();
+        let mut graph_component = GraphComponent::new();
+        graph_component.set_engine(engine.clone());
         Ok(Self {
             tick_rate,
             frame_rate,
@@ -166,8 +168,10 @@ impl App {
                     }
                 },
                 Action::UpdateAudioCode(code) => {
-                    if let Ok(_) = self.engine.update_with_code(&code) {
-                        self.graph_component.set_context(Arc::new(self.engine.context.clone()));
+                    if let Ok(mut engine) = self.engine.lock() {
+                        if let Ok(_) = engine.update_with_code(&code) {
+                            self.graph_component.set_engine(self.engine.clone());
+                        }
                     }
                 },
                 _ => {}
@@ -208,15 +212,18 @@ impl App {
         let config = device.default_output_config()?
             .config();
         
-        let mut engine = self.engine.clone();
+        let engine = self.engine.clone();
         let stream = device.build_output_stream(
             &config,
             move |data: &mut [f32], _: &cpal::OutputCallbackInfo| {
-                let empty_buffer = [0.0f32; 512];
-                let mut input_buffers = vec![&empty_buffer[..]; 8];
-                let output = engine.next_block(input_buffers);
-                for (i, sample) in data.iter_mut().enumerate() {
-                    *sample = output[0].data[i % 512];
+                if let Ok(mut engine) = engine.lock() {
+                    let empty_buffer = [0.0f32; 512];
+                    let mut input_buffers = vec![&empty_buffer[..]; 8];
+                    engine.context.processor.process(&mut engine.context.graph, engine.context.destination);
+                    let output = &engine.context.graph[engine.context.destination].buffers;
+                    for (i, sample) in data.iter_mut().enumerate() {
+                        *sample = output[0][i % 512];
+                    }
                 }
             },
             |err| eprintln!("Audio stream error: {}", err),
