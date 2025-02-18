@@ -23,6 +23,7 @@ struct AudioState {
     pub mute: bool,
 }
 
+#[allow(dead_code)]
 #[derive(Event)]
 struct PlayTone;
 
