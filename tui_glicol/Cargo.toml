@@ -12,6 +12,7 @@ build = "build.rs"
 [dependencies]
 glicol = { path = "../main" }
 glicol_synth = { path = "../synth" }
+cpal = "0.15.2"
 better-panic = "0.3.0"
 clap = { version = "4.5.20", features = [
     "derive",

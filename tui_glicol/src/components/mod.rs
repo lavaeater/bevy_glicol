@@ -10,6 +10,7 @@ use crate::{action::Action, config::Config, tui::Event};
 
 pub mod fps;
 pub mod home;
+pub mod graph;
 
 /// `Component` is a trait that represents a visual and interactive element of the user interface.
 ///
@@ -102,7 +103,7 @@ pub trait Component {
     ///
     /// # Arguments
     ///
-    /// * `action` - An action that may modify the state of the component.
+    /// * `action` - The action to be processed.
     ///
     /// # Returns
     ///
@@ -111,15 +112,15 @@ pub trait Component {
         let _ = action; // to appease clippy
         Ok(None)
     }
-    /// Render the component on the screen. (REQUIRED)
+    /// Draw the component on the screen. (REQUIRED)
     ///
     /// # Arguments
     ///
-    /// * `f` - A frame used for rendering.
-    /// * `area` - The area in which the component should be drawn.
+    /// * `f` - A frame used for drawing.
+    /// * `area` - The area that the component should be drawn within.
     ///
     /// # Returns
     ///
     /// * `Result<()>` - An Ok result or an error.
-    fn draw(&mut self, frame: &mut Frame, area: Rect) -> Result<()>;
+    fn draw(&mut self, f: &mut Frame<'_>, area: Rect) -> Result<()>;
 }
