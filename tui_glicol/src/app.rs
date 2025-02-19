@@ -264,9 +264,15 @@ impl App {
                 Action::SpecialAudio => {
                     if let Ok(mut engine) = self.engine.lock() {
                         match engine.update_with_code(SPECIAL) {
-                            Ok(_) => self
-                                .graph_component
-                                .update_node_count(engine.context.graph.node_count()),
+                            Ok(_) => {
+                                engine.set_bpm(640.0);
+                                self
+                                    .graph_component
+                                    .update_node_count(engine.context.graph.node_count());
+                                self
+                                    .graph_component
+                                    .update_bpm(engine.get_bpm());
+                            },
                             Err(e) => {
                                 let err_msg = format!("Failed to update SPECIAL Glicol code: {e}");
                                 error!("{err_msg}");

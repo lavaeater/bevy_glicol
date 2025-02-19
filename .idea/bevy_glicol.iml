@@ -15,8 +15,10 @@
       <sourceFolder url="file://$MODULE_DIR$/synth/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/tui_glicol/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/wasm/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/glicol-cli/src" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/target" />
       <excludeFolder url="file://$MODULE_DIR$/tui_glicol/target" />
+      <excludeFolder url="file://$MODULE_DIR$/glicol-cli/target" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />

@@ -1,6 +1,6 @@
 [workspace]
-default-members = ["main"]
-members = ["main", "parser", "synth", "tui_glicol", "bevy_glicol"]
+default-members = ["tui_glicol"]
+members = ["main", "parser", "synth", "tui_glicol", "bevy_glicol", "glicol-cli"]
 resolver = "1"
 
 [workspace.package]
