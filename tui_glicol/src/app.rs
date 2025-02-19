@@ -6,7 +6,7 @@ use tokio::sync::mpsc;
 use tracing::{debug, info, error};
 use glicol::Engine;
 use cpal::traits::{DeviceTrait, HostTrait, StreamTrait};
-use std::sync::{Arc, Mutex};
+use std::{sync::{Arc, Mutex}, fs, collections::HashMap};
 
 use crate::{
     action::Action,
@@ -47,6 +47,26 @@ impl App {
         let (action_tx, action_rx) = mpsc::unbounded_channel();
         
         let mut engine = Engine::<512>::new();
+        
+        // Load sample list from JSON file
+        if let Ok(json_content) = fs::read_to_string(".config/sample-list.json") {
+            if let Ok(sample_map) = serde_json::from_str::<HashMap<String, String>>(&json_content) {
+                for (name, path) in sample_map {
+                    if let Ok(sample_data) = fs::read(&path) {
+                        if let Err(e) = engine.load_sample(name, &sample_data) {
+                            error!("Failed to load sample {}: {}", path, e);
+                        }
+                    } else {
+                        error!("Failed to read sample file: {}", path);
+                    }
+                }
+            } else {
+                error!("Failed to parse sample list JSON");
+            }
+        } else {
+            error!("Failed to read sample list file");
+        }
+        
         engine.update_with_code(r#"out: saw 440.0 >> mul 0.1"#).unwrap();
         let engine = Arc::new(Mutex::new(engine));
         
