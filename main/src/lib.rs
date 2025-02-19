@@ -589,9 +589,11 @@ impl<const N: usize> Engine<N> {
         self.bpm = bpm;
         self.context.send_msg_to_all(Message::SetBPM(bpm));
     }
+
     pub fn set_sr(&mut self, sr: usize) {
         self.sr = sr
     }
+
     pub fn set_seed(&mut self, seed: usize) {
         self.seed = seed
     }

@@ -1,12 +1,14 @@
-use std::sync::{Arc, Mutex};
+use parking_lot::Mutex;
+use std::sync::Arc;
+
 use color_eyre::Result;
+use glicol::Engine;
 use ratatui::{
     layout::{Constraint, Direction, Layout, Rect},
     style::{Color, Style},
     widgets::{Block, Borders, Paragraph},
     Frame,
 };
-use glicol::Engine;
 
 use crate::components::Component;
 
@@ -34,8 +36,8 @@ impl<const N: usize> Component for GraphComponent<N> {
         let layout = Layout::default()
             .direction(Direction::Vertical)
             .constraints([
-                Constraint::Length(3),  // Title
-                Constraint::Min(0),     // Graph content
+                Constraint::Length(3), // Title
+                Constraint::Min(0),    // Graph content
             ])
             .split(area);
 
@@ -43,9 +45,8 @@ impl<const N: usize> Component for GraphComponent<N> {
         let title_block = Block::default()
             .borders(Borders::ALL)
             .style(Style::default().fg(Color::Cyan));
-        
-        let title = Paragraph::new(self.title.clone())
-            .block(title_block);
+
+        let title = Paragraph::new(self.title.clone()).block(title_block);
         f.render_widget(title, layout[0]);
 
         // Draw the graph content
@@ -55,18 +56,16 @@ impl<const N: usize> Component for GraphComponent<N> {
 
         let content = match &self.engine {
             Some(engine) => {
-                if let Ok(engine) = engine.lock() {
-                    // For now, just display a simple representation
-                    format!("Graph with {} nodes", engine.context.graph.node_count())
-                } else {
-                    "Error accessing graph".to_string()
-                }
+                // For now, just display a simple representation
+                format!(
+                    "Graph with {} nodes",
+                    engine.lock().context.graph.node_count()
+                )
             }
             None => "No graph loaded".to_string(),
         };
 
-        let content = Paragraph::new(content)
-            .block(content_block);
+        let content = Paragraph::new(content).block(content_block);
         f.render_widget(content, layout[1]);
 
         Ok(())

@@ -1,14 +1,19 @@
 use color_eyre::Result;
-use cpal::traits::{DeviceTrait, HostTrait, StreamTrait};
+use cpal::{
+    traits::{DeviceTrait, HostTrait, StreamTrait},
+    FromSample, SizedSample,
+};
 use crossterm::event::KeyEvent;
 use glicol::Engine;
-use hound;
+use parking_lot::Mutex;
 use ratatui::prelude::Rect;
 use serde::{Deserialize, Serialize};
 use std::{
     collections::HashMap,
-    fs,
-    sync::{Arc, Mutex},
+    sync::{
+        atomic::{AtomicPtr, AtomicUsize, Ordering},
+        Arc,
+    },
 };
 use tokio::sync::mpsc;
 use tracing::{debug, error, info};
@@ -24,6 +29,7 @@ use crate::{
 
 const SPECIAL: &str = include_str!("../.config/synth.txt");
 const SAMPLES: &str = include_str!("../.config/sample-list.json");
+const BLOCK_SIZE: usize = 128;
 
 pub struct App {
     config: Config,
@@ -36,9 +42,9 @@ pub struct App {
     last_tick_key_events: Vec<KeyEvent>,
     action_tx: mpsc::UnboundedSender<Action>,
     action_rx: mpsc::UnboundedReceiver<Action>,
-    engine: Arc<Mutex<Engine<512>>>,
+    engine: Arc<Mutex<Engine<BLOCK_SIZE>>>,
     stream: Option<cpal::Stream>,
-    graph_component: GraphComponent<512>,
+    graph_component: GraphComponent<BLOCK_SIZE>,
     log_display: LogDisplay,
 }
 
@@ -52,7 +58,7 @@ impl App {
     pub fn new(tick_rate: f64, frame_rate: f64) -> Result<Self> {
         let (action_tx, action_rx) = mpsc::unbounded_channel();
 
-        let mut engine = Engine::<512>::new();
+        let mut engine = Engine::<BLOCK_SIZE>::new();
         // match fs::read_to_string("../.config/sample-list.json") {
         // Ok(json_content) => {
         if let Ok(sample_map) = serde_json::from_str::<HashMap<String, String>>(SAMPLES) {
@@ -92,12 +98,6 @@ impl App {
                 }
             }
         }
-        //     }
-        //     Err(err) => {
-        //         error!("{}", err);
-        //         log_lines.push(format!("{}", err));
-        //     }
-        // }
 
         engine
             .update_with_code(r#"out: saw 440.0 >> mul 0.1"#)
@@ -233,24 +233,18 @@ impl App {
                     }
                 }
                 Action::UpdateAudioCode(code) => {
-                    if let Ok(mut engine) = self.engine.lock() {
-                        if engine.update_with_code(&code).is_ok() {
-                            self.graph_component.set_engine(self.engine.clone());
-                        }
+                    if self.engine.lock().update_with_code(&code).is_ok() {
+                        self.graph_component.set_engine(self.engine.clone());
                     }
                 }
-                Action::SpecialAudio => {
-                    if let Ok(mut engine) = self.engine.lock() {
-                        match engine.update_with_code(&SPECIAL) {
-                            Ok(_) => self.graph_component.set_engine(self.engine.clone()),
-                            Err(e) => {
-                                let err_msg = format!("Failed to update SPECIAL Glicol code: {e}");
-                                error!("{err_msg}");
-                                self.log_display.add_error(err_msg);
-                            }
-                        }
+                Action::SpecialAudio => match self.engine.lock().update_with_code(&SPECIAL) {
+                    Ok(_) => self.graph_component.set_engine(self.engine.clone()),
+                    Err(e) => {
+                        let err_msg = format!("Failed to update SPECIAL Glicol code: {e}");
+                        error!("{err_msg}");
+                        self.log_display.add_error(err_msg);
                     }
-                }
+                },
                 _ => {}
             }
             for component in self.components.iter_mut() {
@@ -309,32 +303,102 @@ impl App {
             }
         };
 
-        let config = device.default_output_config()?.config();
+        let config = device.default_output_config()?;
 
-        let engine = self.engine.clone();
-        let stream = device.build_output_stream(
-            &config,
-            move |data: &mut [f32], _: &cpal::OutputCallbackInfo| {
-                if let Ok(mut engine) = engine.lock() {
-                    // Process the next block
-                    let empty_buffer = [0.0f32; 512];
-                    let input_buffers = vec![&empty_buffer[..]; 8];
-                    let output = engine.next_block(input_buffers);
-                    // Copy the output data
-                    for (i, sample) in data.iter_mut().enumerate() {
-                        *sample = output[0][i % 512];
-                    }
-                }
-            },
-            |err| {
-                tracing::error!("Audio stream error: {}", err);
-                eprintln!("Audio stream error: {}", err);
-            },
-            None,
-        )?;
-
-        stream.play()?;
-        self.stream = Some(stream);
+        let engine_clone = self.engine.clone();
+        match config.sample_format() {
+            cpal::SampleFormat::F32 => tokio::spawn(async move {
+                run_audio::<f32>(&device, &config.into(), engine_clone).unwrap()
+            }),
+            sample_format => {
+                panic!("Unsupported sample format '{sample_format}'")
+            }
+        };
+        // tokio::spawn(move || match config.sample_format() {
+        //     cpal::SampleFormat::F32 => run_audio::<f32>(&device, &config.into(), engine_clone),
+        //     sample_format => panic!("Unsupported sample format '{sample_format}'"),
+        // });
         Ok(())
     }
+}
+
+fn run_audio<T>(
+    device: &cpal::Device,
+    config: &cpal::StreamConfig,
+    engine: Arc<Mutex<glicol::Engine<BLOCK_SIZE>>>,
+) -> Result<(), anyhow::Error>
+where
+    T: SizedSample + FromSample<f32>,
+{
+    let sr = config.sample_rate.0 as usize;
+    let channels = 2_usize; //config.channels as usize;
+
+    engine.lock().set_sr(sr);
+    engine.lock().livecoding = false;
+
+    let engine_clone = engine.clone();
+
+    let mut prev_block: [glicol_synth::Buffer<BLOCK_SIZE>; 2] = [glicol_synth::Buffer::SILENT; 2];
+
+    let ptr = prev_block.as_mut_ptr();
+    let prev_block_ptr = Arc::new(AtomicPtr::<glicol_synth::Buffer<BLOCK_SIZE>>::new(ptr));
+    let prev_block_len = Arc::new(AtomicUsize::new(prev_block.len()));
+
+    let mut prev_block_pos: usize = BLOCK_SIZE;
+
+    let stream = device.build_output_stream(
+        config,
+        move |data: &mut [T], _: &cpal::OutputCallbackInfo| {
+            let block_step = data.len() / channels;
+
+            let mut write_samples =
+                |block: &[glicol_synth::Buffer<BLOCK_SIZE>], sample_i: usize, i: usize| {
+                    for chan in 0..channels {
+                        let value: T = T::from_sample(block[chan][i]);
+                        data[sample_i * channels + chan] = value;
+                    }
+                };
+
+            let ptr = prev_block_ptr.load(Ordering::Acquire);
+            let len = prev_block_len.load(Ordering::Acquire);
+            let prev_block: &mut [glicol_synth::Buffer<BLOCK_SIZE>] =
+                unsafe { std::slice::from_raw_parts_mut(ptr, len) };
+
+            let mut writes = 0;
+
+            for i in prev_block_pos..BLOCK_SIZE {
+                write_samples(prev_block, writes, i);
+                writes += 1;
+            }
+
+            prev_block_pos = BLOCK_SIZE;
+            while writes < block_step {
+                let mut e = engine_clone.lock();
+                let block = e.next_block(vec![]);
+
+                if writes + BLOCK_SIZE <= block_step {
+                    for i in 0..BLOCK_SIZE {
+                        write_samples(block, writes, i);
+                        writes += 1;
+                    }
+                } else {
+                    let e = block_step - writes;
+                    for i in 0..e {
+                        write_samples(block, writes, i);
+                        writes += 1;
+                    }
+                    for (buffer, block) in prev_block.iter_mut().zip(block.iter()) {
+                        buffer.copy_from_slice(block);
+                    }
+                    prev_block_pos = e;
+                    break;
+                }
+            }
+        },
+        |err| error!("an error occurred on stream: {err}"),
+        None,
+    )?;
+    stream.play()?;
+
+    loop {}
 }

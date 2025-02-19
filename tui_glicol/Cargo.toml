@@ -11,15 +11,7 @@ build = "build.rs"
 
 [dependencies]
 glicol = { path = "../main", features = ["use-meta", "use-samples"] }
-glicol_synth = { path = "../synth", features = [
-    "use-samples",
-    "use-meta",
-    "node-boxed",
-    "node-pass",
-    "node-sampling",
-    "node-dynamic",
-    "node-sum",
-], default-features = true }
+glicol_synth = { path = "../synth", features = ["use-samples", "use-meta"] }
 cpal = "0.15.2"
 better-panic = "0.3.0"
 clap = { version = "4.5.20", features = [
@@ -53,6 +45,8 @@ tokio-util = "0.7.12"
 tracing = "0.1.40"
 tracing-error = "0.2.0"
 tracing-subscriber = { version = "0.3.18", features = ["env-filter", "serde"] }
+parking_lot = "0.12.2"
+anyhow = "1.0.90"
 
 [build-dependencies]
 anyhow = "1.0.90"

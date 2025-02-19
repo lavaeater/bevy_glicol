@@ -13,7 +13,7 @@ const BLOCK_SIZE: usize = 128;
 
 #[derive(Resource)]
 pub struct GlicolEngine {
-    pub engine: Arc<Mutex<glicol::Engine<128>>>,
+    pub engine: Arc<Mutex<glicol::Engine<BLOCK_SIZE>>>,
 }
 
 impl GlicolEngine {
@@ -97,7 +97,7 @@ where
             while writes < block_step {
                 let mut e = engine_clone.lock();
                 let block = e.next_block(vec![]);
-                
+
                 if writes + BLOCK_SIZE <= block_step {
                     for i in 0..BLOCK_SIZE {
                         write_samples(block, writes, i);
