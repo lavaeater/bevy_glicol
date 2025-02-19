@@ -9,14 +9,6 @@
   <component name="ChangeListManager">
     <list default="true" id="3fc530a1-00aa-4333-8232-e39e75f97a43" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Cargo.lock" beforeDir="false" afterPath="$PROJECT_DIR$/Cargo.lock" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Cargo.toml" beforeDir="false" afterPath="$PROJECT_DIR$/Cargo.toml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/glicol-cli/Cargo.toml" beforeDir="false" afterPath="$PROJECT_DIR$/glicol-cli/Cargo.toml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/glicol-cli/Justfile" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/glicol-cli/src/main.rs" beforeDir="false" afterPath="$PROJECT_DIR$/glicol-cli/src/main.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/glicol-cli/src/recent_lines.rs" beforeDir="false" afterPath="$PROJECT_DIR$/glicol-cli/src/recent_lines.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/main/src/lib.rs" beforeDir="false" afterPath="$PROJECT_DIR$/main/src/lib.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tui_glicol/src/app.rs" beforeDir="false" afterPath="$PROJECT_DIR$/tui_glicol/src/app.rs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -41,13 +33,14 @@
   </component>
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
+    "ASKED_SHARE_PROJECT_CONFIGURATION_FILES": "true",
     "Cargo.Run tui-glicol.executor": "Run",
     "Cargo.Tests in 'glicol-cli'.executor": "Run",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.git.unshallow": "true",
     "com.codeium.enabled": "true",
     "git-widget-placeholder": "consolidate",
-    "last_opened_file_path": "/home/tommie/projects/games/bevy_glicol/tui_glicol/assets/glicols",
+    "last_opened_file_path": "/home/tommie/projects/games/bevy_glicol/glicol-cli",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
@@ -62,6 +55,7 @@
 }]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/glicol-cli" />
       <recent name="$PROJECT_DIR$/tui_glicol/assets/glicols" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
@@ -70,6 +64,7 @@
     </key>
   </component>
   <component name="RsExternalLinterProjectSettings">
+    <option name="runOnTheFly" value="true" />
     <option name="tool" value="Clippy" />
   </component>
   <component name="RunManager" selected="Cargo.Tests in 'glicol-cli'">
