@@ -1,8 +1,4 @@
-use parking_lot::Mutex;
-use std::sync::Arc;
-
 use color_eyre::Result;
-use glicol::Engine;
 use ratatui::{
     layout::{Constraint, Direction, Layout, Rect},
     style::{Color, Style},
@@ -14,20 +10,20 @@ use crate::components::Component;
 
 #[derive(Clone)]
 pub struct GraphComponent<const N: usize> {
-    engine: Option<Arc<Mutex<Engine<N>>>>,
+    node_count: usize,
     title: String,
 }
 
 impl<const N: usize> GraphComponent<N> {
     pub fn new() -> Self {
         Self {
-            engine: None,
+            node_count: 0,
             title: "Glicol Graph".to_string(),
         }
     }
 
-    pub fn set_engine(&mut self, engine: Arc<Mutex<Engine<N>>>) {
-        self.engine = Some(engine);
+    pub fn update_node_count(&mut self, node_count: usize) {
+        self.node_count = node_count;
     }
 }
 
@@ -54,15 +50,10 @@ impl<const N: usize> Component for GraphComponent<N> {
             .borders(Borders::ALL)
             .style(Style::default());
 
-        let content = match &self.engine {
-            Some(engine) => {
-                // For now, just display a simple representation
-                format!(
-                    "Graph with {} nodes",
-                    engine.lock().context.graph.node_count()
-                )
-            }
-            None => "No graph loaded".to_string(),
+        let content = if self.node_count > 0 {
+            format!("Graph with {} nodes", self.node_count)
+        } else {
+            "No graph loaded".to_string()
         };
 
         let content = Paragraph::new(content).block(content_block);

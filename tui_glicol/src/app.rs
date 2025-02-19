@@ -5,14 +5,13 @@ use cpal::{
 };
 use crossterm::event::KeyEvent;
 use glicol::Engine;
-use parking_lot::Mutex;
 use ratatui::prelude::Rect;
 use serde::{Deserialize, Serialize};
 use std::{
     collections::HashMap,
     sync::{
         atomic::{AtomicPtr, AtomicUsize, Ordering},
-        Arc,
+        Arc, Mutex,
     },
     thread,
 };
@@ -30,7 +29,7 @@ use crate::{
 
 const SPECIAL: &str = include_str!("../.config/synth.txt");
 const SAMPLES: &str = include_str!("../.config/sample-list.json");
-const BLOCK_SIZE: usize = 256;
+const BLOCK_SIZE: usize = 128;
 
 pub struct App {
     config: Config,
@@ -106,7 +105,11 @@ impl App {
         let engine = Arc::new(Mutex::new(engine));
 
         let mut graph_component = GraphComponent::new();
-        graph_component.set_engine(engine.clone());
+
+        if let Ok(engine) = engine.lock() {
+            graph_component.update_node_count(engine.context.graph.node_count());
+        }
+
         Ok(Self {
             tick_rate,
             frame_rate,
@@ -234,18 +237,27 @@ impl App {
                     }
                 }
                 Action::UpdateAudioCode(code) => {
-                    if self.engine.lock().update_with_code(&code).is_ok() {
-                        self.graph_component.set_engine(self.engine.clone());
+                    if let Ok(mut engine) = self.engine.lock() {
+                        if engine.update_with_code(&code).is_ok() {
+                            self.graph_component
+                                .update_node_count(engine.context.graph.node_count());
+                        }
                     }
                 }
-                Action::SpecialAudio => match self.engine.lock().update_with_code(&SPECIAL) {
-                    Ok(_) => self.graph_component.set_engine(self.engine.clone()),
-                    Err(e) => {
-                        let err_msg = format!("Failed to update SPECIAL Glicol code: {e}");
-                        error!("{err_msg}");
-                        self.log_display.add_error(err_msg);
+                Action::SpecialAudio => {
+                    if let Ok(mut engine) = self.engine.lock() {
+                        match engine.update_with_code(SPECIAL) {
+                            Ok(_) => self
+                                .graph_component
+                                .update_node_count(engine.context.graph.node_count()),
+                            Err(e) => {
+                                let err_msg = format!("Failed to update SPECIAL Glicol code: {e}");
+                                error!("{err_msg}");
+                                self.log_display.add_error(err_msg);
+                            }
+                        }
                     }
-                },
+                }
                 _ => {}
             }
             for component in self.components.iter_mut() {
@@ -330,8 +342,10 @@ where
     let sr = config.sample_rate.0 as usize;
     let channels = 2_usize; //config.channels as usize;
 
-    engine.lock().set_sr(sr);
-    engine.lock().livecoding = false;
+    if let Ok(mut engine) = engine.lock() {
+        engine.set_sr(sr);
+        engine.livecoding = false;
+    }
 
     let engine_clone = engine.clone();
 
@@ -370,7 +384,7 @@ where
 
             prev_block_pos = BLOCK_SIZE;
             while writes < block_step {
-                let mut e = engine_clone.lock();
+                let mut e = engine_clone.lock().unwrap();
                 let block = e.next_block(vec![]);
 
                 if writes + BLOCK_SIZE <= block_step {
