@@ -21,7 +21,7 @@ use tracing::{debug, error, info};
 use crate::{
     action::Action,
     components::{
-        fps::FpsCounter, graph::GraphComponent, home::Home, log_display::LogDisplay, Component,
+        graph::GraphComponent, home::Home, log_display::LogDisplay, Component,
     },
     config::Config,
     tui::{Event, Tui},
@@ -33,7 +33,6 @@ const BLOCK_SIZE: usize = 128;
 
 pub struct App {
     config: Config,
-    tick_rate: f64,
     frame_rate: f64,
     components: Vec<Box<dyn Component>>,
     should_quit: bool,
@@ -55,7 +54,7 @@ pub enum Mode {
 }
 
 impl App {
-    pub fn new(tick_rate: f64, frame_rate: f64) -> Result<Self> {
+    pub fn new(frame_rate: f64) -> Result<Self> {
         let (action_tx, action_rx) = mpsc::unbounded_channel();
 
         let mut engine = Engine::<BLOCK_SIZE>::new();
@@ -100,8 +99,7 @@ impl App {
         }
 
         engine
-            .update_with_code(r#"out: saw 440.0 >> mul 0.1"#)
-            .unwrap();
+            .update_with_code(r#"out: saw 440.0 >> mul 0.1"#)?;
         let engine = Arc::new(Mutex::new(engine));
 
         let mut graph_component = GraphComponent::new();
@@ -109,13 +107,32 @@ impl App {
         if let Ok(engine) = engine.lock() {
             graph_component.update_node_count(engine.context.graph.node_count());
         }
+        let host = cpal::default_host();
+        let device = match host.default_output_device() {
+            Some(device) => device,
+            None => {
+                let err_msg = "No output device found";
+                tracing::error!("{err_msg}");
+                return Err(color_eyre::eyre::eyre!(err_msg));
+            }
+        };
+
+        let config = device.default_output_config()?;
+
+        let engine_clone = engine.clone();
+        match config.sample_format() {
+            cpal::SampleFormat::F32 => {
+                thread::spawn(move || run_audio::<f32>(&device, &config.into(), engine_clone))
+            }
+            sample_format => {
+                panic!("Unsupported sample format '{sample_format}'")
+            }
+        };
 
         Ok(Self {
-            tick_rate,
             frame_rate,
             components: vec![
                 Box::new(Home::new()),
-                Box::new(FpsCounter::default()),
                 Box::new(graph_component.clone()),
             ],
             log_display: LogDisplay::default(),
@@ -135,7 +152,6 @@ impl App {
     pub async fn run(&mut self) -> Result<()> {
         let mut tui = Tui::new()?
             // .mouse(true) // uncomment this line to enable mouse support
-            .tick_rate(self.tick_rate)
             .frame_rate(self.frame_rate);
         tui.enter()?;
 
@@ -175,7 +191,6 @@ impl App {
         let action_tx = self.action_tx.clone();
         match event {
             Event::Quit => action_tx.send(Action::Quit)?,
-            Event::Tick => action_tx.send(Action::Tick)?,
             Event::Render => action_tx.send(Action::Render)?,
             Event::Resize(x, y) => action_tx.send(Action::Resize(x, y))?,
             Event::Key(key) => self.handle_key_event(key)?,
@@ -305,28 +320,28 @@ impl App {
     }
 
     fn setup_audio(&mut self) -> Result<()> {
-        let host = cpal::default_host();
-        let device = match host.default_output_device() {
-            Some(device) => device,
-            None => {
-                let err_msg = "No output device found";
-                tracing::error!("{err_msg}");
-                self.log_display.add_error(err_msg.to_string());
-                return Err(color_eyre::eyre::eyre!(err_msg));
-            }
-        };
-
-        let config = device.default_output_config()?;
-
-        let engine_clone = self.engine.clone();
-        match config.sample_format() {
-            cpal::SampleFormat::F32 => {
-                thread::spawn(move || run_audio::<f32>(&device, &config.into(), engine_clone))
-            }
-            sample_format => {
-                panic!("Unsupported sample format '{sample_format}'")
-            }
-        };
+        // let host = cpal::default_host();
+        // let device = match host.default_output_device() {
+        //     Some(device) => device,
+        //     None => {
+        //         let err_msg = "No output device found";
+        //         tracing::error!("{err_msg}");
+        //         self.log_display.add_error(err_msg.to_string());
+        //         return Err(color_eyre::eyre::eyre!(err_msg));
+        //     }
+        // };
+        // 
+        // let config = device.default_output_config()?;
+        // 
+        // let engine_clone = self.engine.clone();
+        // match config.sample_format() {
+        //     cpal::SampleFormat::F32 => {
+        //         thread::spawn(move || run_audio::<f32>(&device, &config.into(), engine_clone))
+        //     }
+        //     sample_format => {
+        //         panic!("Unsupported sample format '{sample_format}'")
+        //     }
+        // };
         Ok(())
     }
 }
@@ -334,7 +349,7 @@ impl App {
 fn run_audio<T>(
     device: &cpal::Device,
     config: &cpal::StreamConfig,
-    engine: Arc<Mutex<glicol::Engine<BLOCK_SIZE>>>,
+    engine: Arc<Mutex<Engine<BLOCK_SIZE>>>,
 ) -> Result<(), anyhow::Error>
 where
     T: SizedSample + FromSample<f32>,
