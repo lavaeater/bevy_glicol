@@ -308,9 +308,9 @@ impl App {
 
         let engine_clone = self.engine.clone();
         match config.sample_format() {
-            cpal::SampleFormat::F32 => thread::spawn(move || {
-                move || run_audio::<f32>(&device, &config.into(), engine_clone)
-            }),
+            cpal::SampleFormat::F32 => {
+                thread::spawn(move || run_audio::<f32>(&device, &config.into(), engine_clone))
+            }
             sample_format => {
                 panic!("Unsupported sample format '{sample_format}'")
             }
