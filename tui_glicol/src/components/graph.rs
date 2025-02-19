@@ -11,6 +11,7 @@ use crate::components::Component;
 #[derive(Clone)]
 pub struct GraphComponent<const N: usize> {
     node_count: usize,
+    bpm: f32,
     title: String,
 }
 
@@ -18,12 +19,16 @@ impl<const N: usize> GraphComponent<N> {
     pub fn new() -> Self {
         Self {
             node_count: 0,
+            bpm: 0.0,
             title: "Glicol Graph".to_string(),
         }
     }
 
     pub fn update_node_count(&mut self, node_count: usize) {
         self.node_count = node_count;
+    }
+    pub fn update_bpm(&mut self, bpm: f32) {
+        self.bpm = bpm;
     }
 }
 
@@ -51,7 +56,7 @@ impl<const N: usize> Component for GraphComponent<N> {
             .style(Style::default());
 
         let content = if self.node_count > 0 {
-            format!("Graph with {} nodes", self.node_count)
+            format!("Graph with {} nodes\nBPM: {}", self.node_count, self.bpm)
         } else {
             "No graph loaded".to_string()
         };
