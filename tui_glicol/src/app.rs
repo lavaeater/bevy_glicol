@@ -27,7 +27,8 @@ use crate::{
     tui::{Event, Tui},
 };
 
-const SPECIAL: &str = include_str!("../.config/synth.txt");
+const SPECIAL: &str = include_str!("../assets/glicols/SolsticeStream2023.glicol");
+// const SPECIAL: &str = include_str!("../assets/glicols/synth.txt");
 const SAMPLES: &str = include_str!("../.config/sample-list.json");
 const BLOCK_SIZE: usize = 128;
 
@@ -97,6 +98,7 @@ impl App {
                 }
             }
         }
+        engine.set_bpm(120.0);
 
         engine
             .update_with_code(r#"out: saw 440.0 >> mul 0.1"#)?;
@@ -320,28 +322,6 @@ impl App {
     }
 
     fn setup_audio(&mut self) -> Result<()> {
-        // let host = cpal::default_host();
-        // let device = match host.default_output_device() {
-        //     Some(device) => device,
-        //     None => {
-        //         let err_msg = "No output device found";
-        //         tracing::error!("{err_msg}");
-        //         self.log_display.add_error(err_msg.to_string());
-        //         return Err(color_eyre::eyre::eyre!(err_msg));
-        //     }
-        // };
-        // 
-        // let config = device.default_output_config()?;
-        // 
-        // let engine_clone = self.engine.clone();
-        // match config.sample_format() {
-        //     cpal::SampleFormat::F32 => {
-        //         thread::spawn(move || run_audio::<f32>(&device, &config.into(), engine_clone))
-        //     }
-        //     sample_format => {
-        //         panic!("Unsupported sample format '{sample_format}'")
-        //     }
-        // };
         Ok(())
     }
 }
@@ -360,6 +340,7 @@ where
     if let Ok(mut engine) = engine.lock() {
         engine.set_sr(sr);
         engine.livecoding = false;
+        engine.set_bpm(120.0);
     }
 
     let engine_clone = engine.clone();
@@ -398,9 +379,9 @@ where
             }
 
             prev_block_pos = BLOCK_SIZE;
+            let mut engine = engine_clone.lock().unwrap();
             while writes < block_step {
-                let mut e = engine_clone.lock().unwrap();
-                let block = e.next_block(vec![]);
+                let block = engine.next_block(vec![]);
 
                 if writes + BLOCK_SIZE <= block_step {
                     for i in 0..BLOCK_SIZE {
