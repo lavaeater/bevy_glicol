@@ -14,9 +14,9 @@ use std::{
         atomic::{AtomicPtr, AtomicUsize, Ordering},
         Arc,
     },
+    thread,
 };
 use tokio::sync::mpsc;
-use tokio::task::spawn_blocking;
 use tracing::{debug, error, info};
 
 use crate::{
@@ -308,8 +308,8 @@ impl App {
 
         let engine_clone = self.engine.clone();
         match config.sample_format() {
-            cpal::SampleFormat::F32 => tokio::task::spawn_blocking(move || {
-                run_audio::<f32>(&device, &config.into(), engine_clone).unwrap()
+            cpal::SampleFormat::F32 => thread::spawn(move || {
+                move || run_audio::<f32>(&device, &config.into(), engine_clone)
             }),
             sample_format => {
                 panic!("Unsupported sample format '{sample_format}'")
@@ -396,5 +396,7 @@ where
         None,
     )?;
     stream.play()?;
-    loop {}
+    loop {
+        thread::park() // wait forever
+    }
 }
