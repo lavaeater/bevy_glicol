@@ -1,0 +1,34 @@
+# This is a configuration file for the bacon tool
+# https://github.com/Canop/bacon
+
+# Defines the default job
+default_job = "check-all"
+
+# Watch all files in the workspace
+[jobs.check-all]
+command = ["cargo", "check", "--workspace"]
+need_stdout = false
+
+# Run clippy on all workspace members
+[jobs.clippy-all]
+command = ["cargo", "clippy", "--workspace"]
+need_stdout = false
+
+# Run tests for all workspace members
+[jobs.test-all]
+command = ["cargo", "test", "--workspace"]
+need_stdout = true
+
+# Custom key bindings
+[keybindings]
+# Press 'c' to run check-all
+c = "job:check-all"
+# Press 'l' to run clippy-all
+l = "job:clippy-all"
+# Press 't' to run tests
+t = "job:test-all"
+
+# Watch all Rust files in the workspace
+[watcher]
+watch_all = ["src", "tests"]
+ignore = ["target"]

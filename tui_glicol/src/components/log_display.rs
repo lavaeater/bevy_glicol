@@ -22,6 +22,7 @@ impl LogDisplay {
         }
     }
 
+    #[allow(unused)]
     pub fn add_info(&mut self, message: String) {
         self.logs.push_back((message, Style::default().fg(Color::Green)));
         if self.logs.len() > MAX_LOGS {
@@ -53,6 +54,7 @@ impl Component for LogDisplay {
         Ok(())
     }
 
+    #[allow(unused)]
     fn update(&mut self, action: Action) -> Result<Option<Action>> {
         Ok(None)
     }

@@ -7,6 +7,7 @@ use tracing::{debug, info, error};
 use glicol::Engine;
 use cpal::traits::{DeviceTrait, HostTrait, StreamTrait};
 use std::{sync::{Arc, Mutex}, fs, collections::HashMap};
+use hound;
 
 use crate::{
     action::Action,
@@ -52,12 +53,32 @@ impl App {
         if let Ok(json_content) = fs::read_to_string(".config/sample-list.json") {
             if let Ok(sample_map) = serde_json::from_str::<HashMap<String, String>>(&json_content) {
                 for (name, path) in sample_map {
-                    if let Ok(sample_data) = fs::read(&path) {
-                        if let Err(e) = engine.load_sample(name, &sample_data) {
-                            error!("Failed to load sample {}: {}", path, e);
+                    match hound::WavReader::open(&path) {
+                        Ok(mut reader) => {
+                            let spec = reader.spec();
+                            let samples: Vec<f32> = match spec.sample_format {
+                                hound::SampleFormat::Float => {
+                                    reader.samples::<f32>().filter_map(Result::ok).collect()
+                                }
+                                hound::SampleFormat::Int => {
+                                    if spec.bits_per_sample == 16 {
+                                        reader.samples::<i16>()
+                                            .filter_map(Result::ok)
+                                            .map(|s| s as f32 / 32768.0)
+                                            .collect()
+                                    } else {
+                                        error!("Unsupported bits per sample: {}", spec.bits_per_sample);
+                                        continue;
+                                    }
+                                }
+                            };
+                            
+                            // Convert samples to static lifetime - this is safe because the Engine keeps them for its entire lifetime
+                            let samples_static = Box::leak(samples.into_boxed_slice());
+                            engine.add_sample(&name, samples_static, spec.channels as usize, spec.sample_rate as usize);
+                            info!("Loaded sample: {}", name);
                         }
-                    } else {
-                        error!("Failed to read sample file: {}", path);
+                        Err(e) => error!("Failed to read WAV file {}: {}", path, e),
                     }
                 }
             } else {
