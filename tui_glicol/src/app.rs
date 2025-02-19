@@ -1,24 +1,29 @@
 use color_eyre::Result;
+use cpal::traits::{DeviceTrait, HostTrait, StreamTrait};
 use crossterm::event::KeyEvent;
+use glicol::Engine;
+use hound;
 use ratatui::prelude::Rect;
 use serde::{Deserialize, Serialize};
+use std::{
+    collections::HashMap,
+    fs,
+    sync::{Arc, Mutex},
+};
 use tokio::sync::mpsc;
-use tracing::{debug, info, error};
-use glicol::Engine;
-use cpal::traits::{DeviceTrait, HostTrait, StreamTrait};
-use std::{sync::{Arc, Mutex}, fs, collections::HashMap};
-use hound;
+use tracing::{debug, error, info};
 
 use crate::{
     action::Action,
-    components::{fps::FpsCounter, home::Home, graph::GraphComponent, log_display::LogDisplay, Component},
+    components::{
+        fps::FpsCounter, graph::GraphComponent, home::Home, log_display::LogDisplay, Component,
+    },
     config::Config,
     tui::{Event, Tui},
 };
 
-
 const SPECIAL: &str = include_str!("../.config/synth.txt");
-
+const SAMPLES: &str = include_str!("../.config/sample-list.json");
 
 pub struct App {
     config: Config,
@@ -46,57 +51,69 @@ pub enum Mode {
 impl App {
     pub fn new(tick_rate: f64, frame_rate: f64) -> Result<Self> {
         let (action_tx, action_rx) = mpsc::unbounded_channel();
-        
+
         let mut engine = Engine::<512>::new();
-        
-        // Load sample list from JSON file
-        if let Ok(json_content) = fs::read_to_string(".config/sample-list.json") {
-            if let Ok(sample_map) = serde_json::from_str::<HashMap<String, String>>(&json_content) {
-                for (name, path) in sample_map {
-                    match hound::WavReader::open(&path) {
-                        Ok(mut reader) => {
-                            let spec = reader.spec();
-                            let samples: Vec<f32> = match spec.sample_format {
-                                hound::SampleFormat::Float => {
-                                    reader.samples::<f32>().filter_map(Result::ok).collect()
+        // match fs::read_to_string("../.config/sample-list.json") {
+        // Ok(json_content) => {
+        if let Ok(sample_map) = serde_json::from_str::<HashMap<String, String>>(SAMPLES) {
+            for (name, path) in sample_map {
+                match hound::WavReader::open(&path) {
+                    Ok(mut reader) => {
+                        let spec = reader.spec();
+                        let samples: Vec<f32> = match spec.sample_format {
+                            hound::SampleFormat::Float => {
+                                reader.samples::<f32>().filter_map(Result::ok).collect()
+                            }
+                            hound::SampleFormat::Int => {
+                                if spec.bits_per_sample == 16 {
+                                    reader
+                                        .samples::<i16>()
+                                        .filter_map(Result::ok)
+                                        .map(|s| s as f32 / 32768.0)
+                                        .collect()
+                                } else {
+                                    error!("Unsupported bits per sample: {}", spec.bits_per_sample);
+                                    continue;
                                 }
-                                hound::SampleFormat::Int => {
-                                    if spec.bits_per_sample == 16 {
-                                        reader.samples::<i16>()
-                                            .filter_map(Result::ok)
-                                            .map(|s| s as f32 / 32768.0)
-                                            .collect()
-                                    } else {
-                                        error!("Unsupported bits per sample: {}", spec.bits_per_sample);
-                                        continue;
-                                    }
-                                }
-                            };
-                            
-                            // Convert samples to static lifetime - this is safe because the Engine keeps them for its entire lifetime
-                            let samples_static = Box::leak(samples.into_boxed_slice());
-                            engine.add_sample(&name, samples_static, spec.channels as usize, spec.sample_rate as usize);
-                            info!("Loaded sample: {}", name);
-                        }
-                        Err(e) => error!("Failed to read WAV file {}: {}", path, e),
+                            }
+                        };
+
+                        // Convert samples to static lifetime - this is safe because the Engine keeps them for its entire lifetime
+                        let samples_static = Box::leak(samples.into_boxed_slice());
+                        engine.add_sample(
+                            &name,
+                            samples_static,
+                            spec.channels as usize,
+                            spec.sample_rate as usize,
+                        );
+                        info!("Loaded sample: {}", name);
                     }
+                    Err(e) => error!("Failed to read WAV file {}: {}", path, e),
                 }
-            } else {
-                error!("Failed to parse sample list JSON");
             }
-        } else {
-            error!("Failed to read sample list file");
         }
-        
-        engine.update_with_code(r#"out: saw 440.0 >> mul 0.1"#).unwrap();
+        //     }
+        //     Err(err) => {
+        //         error!("{}", err);
+        //         log_lines.push(format!("{}", err));
+        //     }
+        // }
+
+        engine
+            .update_with_code(r#"out: saw 440.0 >> mul 0.1"#)
+            .unwrap();
         let engine = Arc::new(Mutex::new(engine));
-        
+
         let mut graph_component = GraphComponent::new();
         graph_component.set_engine(engine.clone());
         Ok(Self {
             tick_rate,
             frame_rate,
-            components: vec![Box::new(Home::new()), Box::new(FpsCounter::default()), Box::new(graph_component.clone())],
+            components: vec![
+                Box::new(Home::new()),
+                Box::new(FpsCounter::default()),
+                Box::new(graph_component.clone()),
+            ],
             log_display: LogDisplay::default(),
             should_quit: false,
             should_suspend: false,
@@ -214,14 +231,14 @@ impl App {
                     if let Some(stream) = self.stream.take() {
                         drop(stream);
                     }
-                },
+                }
                 Action::UpdateAudioCode(code) => {
                     if let Ok(mut engine) = self.engine.lock() {
                         if engine.update_with_code(&code).is_ok() {
                             self.graph_component.set_engine(self.engine.clone());
                         }
                     }
-                },
+                }
                 Action::SpecialAudio => {
                     if let Ok(mut engine) = self.engine.lock() {
                         match engine.update_with_code(&SPECIAL) {
@@ -233,7 +250,7 @@ impl App {
                             }
                         }
                     }
-                },
+                }
                 _ => {}
             }
             for component in self.components.iter_mut() {
@@ -256,7 +273,7 @@ impl App {
             let area = frame.area();
             let graph_area = Rect::new(0, 0, area.width, area.height - 6);
             let log_area = Rect::new(0, area.height - 6, area.width, 6);
-            
+
             for component in self.components.iter_mut() {
                 if let Err(err) = component.draw(frame, graph_area) {
                     let err_msg = format!("Failed to draw: {:?}", err);
@@ -264,15 +281,17 @@ impl App {
                     let _ = self.action_tx.send(Action::Error(err_msg));
                 }
             }
-            
+
             if let Err(err) = self.graph_component.draw(frame, graph_area) {
                 let err_msg = format!("Failed to draw graph: {:?}", err);
                 self.log_display.add_error(err_msg.clone());
                 let _ = self.action_tx.send(Action::Error(err_msg));
             }
-            
+
             if let Err(err) = self.log_display.draw(frame, log_area) {
-                let _ = self.action_tx.send(Action::Error(format!("Failed to draw logs: {:?}", err)));
+                let _ = self
+                    .action_tx
+                    .send(Action::Error(format!("Failed to draw logs: {:?}", err)));
             }
         })?;
         Ok(())
@@ -289,10 +308,9 @@ impl App {
                 return Err(color_eyre::eyre::eyre!(err_msg));
             }
         };
-        
-        let config = device.default_output_config()?
-            .config();
-        
+
+        let config = device.default_output_config()?.config();
+
         let engine = self.engine.clone();
         let stream = device.build_output_stream(
             &config,
@@ -312,9 +330,9 @@ impl App {
                 tracing::error!("Audio stream error: {}", err);
                 eprintln!("Audio stream error: {}", err);
             },
-            None
+            None,
         )?;
-        
+
         stream.play()?;
         self.stream = Some(stream);
         Ok(())

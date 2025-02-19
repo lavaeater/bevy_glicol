@@ -127,6 +127,7 @@ pub fn makenode<const N: usize>(
 
         #[cfg(feature = "use-samples")]
         Component::Sp(nodes::Sp { sample_sym }) => {
+            let alt = "808bd";
             let Some(sample) = samples_dict.get(*sample_sym) else {
                 return Err(EngineError::NonExistSample(sample_sym.to_string()));
             };
