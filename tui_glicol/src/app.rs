@@ -16,6 +16,7 @@ use std::{
     },
 };
 use tokio::sync::mpsc;
+use tokio::task::spawn_blocking;
 use tracing::{debug, error, info};
 
 use crate::{
@@ -29,7 +30,7 @@ use crate::{
 
 const SPECIAL: &str = include_str!("../.config/synth.txt");
 const SAMPLES: &str = include_str!("../.config/sample-list.json");
-const BLOCK_SIZE: usize = 128;
+const BLOCK_SIZE: usize = 256;
 
 pub struct App {
     config: Config,
@@ -307,17 +308,13 @@ impl App {
 
         let engine_clone = self.engine.clone();
         match config.sample_format() {
-            cpal::SampleFormat::F32 => tokio::spawn(async move {
+            cpal::SampleFormat::F32 => tokio::task::spawn_blocking(move || {
                 run_audio::<f32>(&device, &config.into(), engine_clone).unwrap()
             }),
             sample_format => {
                 panic!("Unsupported sample format '{sample_format}'")
             }
         };
-        // tokio::spawn(move || match config.sample_format() {
-        //     cpal::SampleFormat::F32 => run_audio::<f32>(&device, &config.into(), engine_clone),
-        //     sample_format => panic!("Unsupported sample format '{sample_format}'"),
-        // });
         Ok(())
     }
 }
@@ -399,6 +396,5 @@ where
         None,
     )?;
     stream.play()?;
-
     loop {}
 }
