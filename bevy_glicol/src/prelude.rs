@@ -38,9 +38,7 @@ impl GlicolEngine {
 
     pub fn update_with_code(&self, code: &str) {
         let mut engine = self.engine.lock();
-        if let Err(e) = engine.update_with_code(code) {
-            error!("Failed to update Glicol code: {}", e);
-        }
+        engine.update_with_code(code);
     }
 }
 
@@ -96,7 +94,7 @@ where
             prev_block_pos = BLOCK_SIZE;
             while writes < block_step {
                 let mut e = engine_clone.lock();
-                let block = e.next_block(vec![]);
+                let (block, raw_err) = e.next_block(vec![]);
 
                 if writes + BLOCK_SIZE <= block_step {
                     for i in 0..BLOCK_SIZE {

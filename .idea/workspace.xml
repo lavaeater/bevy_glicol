@@ -9,6 +9,119 @@
   <component name="ChangeListManager">
     <list default="true" id="3fc530a1-00aa-4333-8232-e39e75f97a43" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Cargo.lock" beforeDir="false" afterPath="$PROJECT_DIR$/Cargo.lock" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Cargo.toml" beforeDir="false" afterPath="$PROJECT_DIR$/Cargo.toml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bevy_glicol/Cargo.toml" beforeDir="false" afterPath="$PROJECT_DIR$/bevy_glicol/Cargo.toml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main/Cargo.toml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/main/LICENSE" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/main/README.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/main/examples/expr.rs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/main/examples/hello.rs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/main/examples/input.rs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/main/examples/msg_synth.rs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/main/examples/p_synth.rs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/main/examples/plot.rs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/main/examples/plpf.rs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/main/examples/raw.rs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/main/examples/update.rs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/main/src/error.rs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/main/src/lib.rs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/main/src/util.rs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/main/tests/sin.rs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/parser/Cargo.toml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/parser/LICENSE" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/parser/examples/choose.rs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/parser/examples/hello.rs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/parser/examples/lcs.rs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/parser/examples/pattern.rs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/parser/examples/psampler.rs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/parser/examples/seq.rs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/parser/examples/test.rs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/parser/src/glicol.pest" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/parser/src/lib.rs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/parser/src/nodes.rs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/parser/src/util.rs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/parser/tests/all_nodes.rs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/parser/tests/sin.rs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/synth/Cargo.toml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/synth/LICENSE" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/synth/README.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/synth/benches/fm.rs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/synth/benches/next_block.rs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/synth/examples/chain.rs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/synth/examples/connect.rs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/synth/examples/freeverb.rs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/synth/examples/gnode.rs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/synth/examples/hello.rs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/synth/examples/plot-am.rs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/synth/examples/plot-g.rs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/synth/examples/plot-imp.rs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/synth/examples/plot.rs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/synth/examples/plot2.rs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/synth/examples/plot3.rs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/synth/examples/plot_psynth.rs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/synth/examples/sin.rs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/synth/src/buffer.rs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/synth/src/context.rs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/synth/src/graph.rs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/synth/src/lib.rs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/synth/src/node/boxed.rs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/synth/src/node/compound/bd.rs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/synth/src/node/compound/hh.rs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/synth/src/node/compound/mod.rs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/synth/src/node/compound/sawsynth.rs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/synth/src/node/compound/sn.rs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/synth/src/node/compound/squsynth.rs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/synth/src/node/compound/trisynth.rs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/synth/src/node/delay/delayms.rs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/synth/src/node/delay/delayn.rs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/synth/src/node/delay/mod.rs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/synth/src/node/dynamic/eval.rs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/synth/src/node/dynamic/expr.rs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/synth/src/node/dynamic/meta.rs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/synth/src/node/dynamic/mod.rs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/synth/src/node/effect/balance.rs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/synth/src/node/effect/mod.rs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/synth/src/node/effect/pan.rs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/synth/src/node/effect/plate.rs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/synth/src/node/effect/reverb.rs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/synth/src/node/envelope/adsr.rs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/synth/src/node/envelope/envperc.rs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/synth/src/node/envelope/mod.rs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/synth/src/node/filter/apfmsgain.rs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/synth/src/node/filter/mod.rs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/synth/src/node/filter/onepole.rs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/synth/src/node/filter/rhpf.rs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/synth/src/node/filter/rlpf.rs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/synth/src/node/mod.rs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/synth/src/node/operator/add.rs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/synth/src/node/operator/mod.rs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/synth/src/node/operator/mul.rs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/synth/src/node/oscillator/mod.rs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/synth/src/node/oscillator/saw_osc.rs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/synth/src/node/oscillator/sin_osc.rs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/synth/src/node/oscillator/squ_osc.rs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/synth/src/node/oscillator/tri_osc.rs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/synth/src/node/pass.rs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/synth/src/node/sampling/mod.rs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/synth/src/node/sampling/psampler.rs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/synth/src/node/sampling/sampler.rs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/synth/src/node/sequencer/arrange.rs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/synth/src/node/sequencer/choose.rs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/synth/src/node/sequencer/mod.rs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/synth/src/node/sequencer/seq.rs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/synth/src/node/sequencer/speed.rs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/synth/src/node/signal/constsig.rs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/synth/src/node/signal/imp.rs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/synth/src/node/signal/mod.rs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/synth/src/node/signal/noise.rs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/synth/src/node/signal/phasor.rs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/synth/src/node/signal/points.rs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/synth/src/node/sum.rs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/synth/src/node/synth/mod.rs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/synth/src/node/synth/msgsynth.rs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/synth/src/node/synth/pattern_synth.rs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/tui_glicol/Cargo.toml" beforeDir="false" afterPath="$PROJECT_DIR$/tui_glicol/Cargo.toml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -31,28 +144,28 @@
     <option name="showLibraryContents" value="true" />
     <option name="showMembers" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "ASKED_SHARE_PROJECT_CONFIGURATION_FILES": "true",
-    "Cargo.Run tui-glicol.executor": "Run",
-    "Cargo.Tests in 'glicol-cli'.executor": "Run",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "com.codeium.enabled": "true",
-    "git-widget-placeholder": "consolidate",
-    "last_opened_file_path": "/home/tommie/projects/games/bevy_glicol/glicol-cli",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "org.rust.cargo.project.model.PROJECT_DISCOVERY": "true",
-    "org.rust.cargo.project.model.impl.CargoExternalSystemProjectAware.subscribe.first.balloon": "",
-    "org.rust.first.attach.projects": "true",
-    "settings.editor.selected.configurable": "language.rust.cargo.check",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ASKED_SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
+    &quot;Cargo.Run tui-glicol.executor&quot;: &quot;Run&quot;,
+    &quot;Cargo.Tests in 'glicol-cli'.executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;com.codeium.enabled&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;massacre&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/home/tommie/projects/games/bevy_glicol/glicol-cli&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;org.rust.cargo.project.model.PROJECT_DISCOVERY&quot;: &quot;true&quot;,
+    &quot;org.rust.cargo.project.model.impl.CargoExternalSystemProjectAware.subscribe.first.balloon&quot;: &quot;&quot;,
+    &quot;org.rust.first.attach.projects&quot;: &quot;true&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;language.rust.cargo.check&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/glicol-cli" />
