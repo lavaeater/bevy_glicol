@@ -101,7 +101,7 @@ impl App {
         engine.set_bpm(120.0);
 
         engine
-            .update_with_code(r#"out: saw 440.0 >> mul 0.1"#)?;
+            .update_with_code(r#"out: saw 440.0 >> mul 0.1"#);
         let engine = Arc::new(Mutex::new(engine));
 
         let mut graph_component = GraphComponent::new();

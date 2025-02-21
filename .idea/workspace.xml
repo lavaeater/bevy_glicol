@@ -12,116 +12,7 @@
       <change beforePath="$PROJECT_DIR$/Cargo.lock" beforeDir="false" afterPath="$PROJECT_DIR$/Cargo.lock" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Cargo.toml" beforeDir="false" afterPath="$PROJECT_DIR$/Cargo.toml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/bevy_glicol/Cargo.toml" beforeDir="false" afterPath="$PROJECT_DIR$/bevy_glicol/Cargo.toml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/main/Cargo.toml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/main/LICENSE" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/main/README.md" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/main/examples/expr.rs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/main/examples/hello.rs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/main/examples/input.rs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/main/examples/msg_synth.rs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/main/examples/p_synth.rs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/main/examples/plot.rs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/main/examples/plpf.rs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/main/examples/raw.rs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/main/examples/update.rs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/main/src/error.rs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/main/src/lib.rs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/main/src/util.rs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/main/tests/sin.rs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/parser/Cargo.toml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/parser/LICENSE" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/parser/examples/choose.rs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/parser/examples/hello.rs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/parser/examples/lcs.rs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/parser/examples/pattern.rs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/parser/examples/psampler.rs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/parser/examples/seq.rs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/parser/examples/test.rs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/parser/src/glicol.pest" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/parser/src/lib.rs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/parser/src/nodes.rs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/parser/src/util.rs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/parser/tests/all_nodes.rs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/parser/tests/sin.rs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/synth/Cargo.toml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/synth/LICENSE" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/synth/README.md" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/synth/benches/fm.rs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/synth/benches/next_block.rs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/synth/examples/chain.rs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/synth/examples/connect.rs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/synth/examples/freeverb.rs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/synth/examples/gnode.rs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/synth/examples/hello.rs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/synth/examples/plot-am.rs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/synth/examples/plot-g.rs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/synth/examples/plot-imp.rs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/synth/examples/plot.rs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/synth/examples/plot2.rs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/synth/examples/plot3.rs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/synth/examples/plot_psynth.rs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/synth/examples/sin.rs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/synth/src/buffer.rs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/synth/src/context.rs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/synth/src/graph.rs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/synth/src/lib.rs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/synth/src/node/boxed.rs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/synth/src/node/compound/bd.rs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/synth/src/node/compound/hh.rs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/synth/src/node/compound/mod.rs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/synth/src/node/compound/sawsynth.rs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/synth/src/node/compound/sn.rs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/synth/src/node/compound/squsynth.rs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/synth/src/node/compound/trisynth.rs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/synth/src/node/delay/delayms.rs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/synth/src/node/delay/delayn.rs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/synth/src/node/delay/mod.rs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/synth/src/node/dynamic/eval.rs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/synth/src/node/dynamic/expr.rs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/synth/src/node/dynamic/meta.rs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/synth/src/node/dynamic/mod.rs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/synth/src/node/effect/balance.rs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/synth/src/node/effect/mod.rs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/synth/src/node/effect/pan.rs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/synth/src/node/effect/plate.rs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/synth/src/node/effect/reverb.rs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/synth/src/node/envelope/adsr.rs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/synth/src/node/envelope/envperc.rs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/synth/src/node/envelope/mod.rs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/synth/src/node/filter/apfmsgain.rs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/synth/src/node/filter/mod.rs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/synth/src/node/filter/onepole.rs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/synth/src/node/filter/rhpf.rs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/synth/src/node/filter/rlpf.rs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/synth/src/node/mod.rs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/synth/src/node/operator/add.rs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/synth/src/node/operator/mod.rs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/synth/src/node/operator/mul.rs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/synth/src/node/oscillator/mod.rs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/synth/src/node/oscillator/saw_osc.rs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/synth/src/node/oscillator/sin_osc.rs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/synth/src/node/oscillator/squ_osc.rs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/synth/src/node/oscillator/tri_osc.rs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/synth/src/node/pass.rs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/synth/src/node/sampling/mod.rs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/synth/src/node/sampling/psampler.rs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/synth/src/node/sampling/sampler.rs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/synth/src/node/sequencer/arrange.rs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/synth/src/node/sequencer/choose.rs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/synth/src/node/sequencer/mod.rs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/synth/src/node/sequencer/seq.rs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/synth/src/node/sequencer/speed.rs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/synth/src/node/signal/constsig.rs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/synth/src/node/signal/imp.rs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/synth/src/node/signal/mod.rs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/synth/src/node/signal/noise.rs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/synth/src/node/signal/phasor.rs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/synth/src/node/signal/points.rs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/synth/src/node/sum.rs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/synth/src/node/synth/mod.rs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/synth/src/node/synth/msgsynth.rs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/synth/src/node/synth/pattern_synth.rs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/tui_glicol/Cargo.toml" beforeDir="false" afterPath="$PROJECT_DIR$/tui_glicol/Cargo.toml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tui_glicol/src/app.rs" beforeDir="false" afterPath="$PROJECT_DIR$/tui_glicol/src/app.rs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -180,7 +71,7 @@
     <option name="runOnTheFly" value="true" />
     <option name="tool" value="Clippy" />
   </component>
-  <component name="RunManager" selected="Cargo.Tests in 'glicol-cli'">
+  <component name="RunManager" selected="Cargo.Test bevy_glicol">
     <configuration name="Run tui-glicol" type="CargoCommandRunConfiguration" factoryName="Cargo Command">
       <option name="buildProfileId" value="dev" />
       <option name="command" value="run --package tui-glicol --bin tui-glicol" />
@@ -218,7 +109,7 @@
       </method>
     </configuration>
     <configuration name="Tests in 'glicol-cli'" type="CargoCommandRunConfiguration" factoryName="Cargo Command" temporary="true">
-      <option name="buildProfileId" value="test" />
+      <option name="buildProfileId" value="dev" />
       <option name="command" value="test --package glicol-cli" />
       <option name="workingDirectory" value="file://$PROJECT_DIR$" />
       <envs />

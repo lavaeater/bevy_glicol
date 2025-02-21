@@ -870,8 +870,8 @@ dependencies = [
  "bevy",
  "bevy_egui",
  "cpal",
- "glicol",
- "glicol_synth",
+ "glicol 0.14.0-dev",
+ "glicol_synth 0.14.0-dev",
  "parking_lot",
  "wasm-bindgen",
  "web-sys",
@@ -3789,12 +3789,25 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6954afac8a8ac2d83c1d5d91905a347499a4ce2b6c541113b52e7669e9d292f9"
 dependencies = [
  "glicol_macros",
- "glicol_parser",
- "glicol_synth",
+ "glicol_parser 0.13.5",
+ "glicol_synth 0.13.5",
  "hashbrown 0.14.5",
  "lcs-diff",
  "pest",
  "petgraph",
+]
+
+[[package]]
+name = "glicol"
+version = "0.14.0-dev"
+source = "git+https://github.com/lavaeater/glicol?branch=main#0317db2e3f157b911bfc28c72ad5db90db963f24"
+dependencies = [
+ "glicol_parser 0.14.0-dev",
+ "glicol_synth 0.14.0-dev",
+ "hashbrown 0.14.5",
+ "pest",
+ "petgraph",
+ "yoke",
 ]
 
 [[package]]
@@ -3807,8 +3820,8 @@ dependencies = [
  "cpal",
  "crossterm",
  "dirs",
- "glicol",
- "glicol_synth",
+ "glicol 0.13.5",
+ "glicol_synth 0.13.5",
  "notify",
  "ratatui",
  "rayon",
@@ -3839,10 +3852,22 @@ checksum = "fe6ddadb71b61e261e3483d4345d3ead7380bf563fd15056ce61d05d87232e5d"
 dependencies = [
  "fasteval",
  "glicol_macros",
- "glicol_synth",
+ "glicol_synth 0.13.5",
  "hashbrown 0.14.5",
  "pest",
  "pest_derive",
+]
+
+[[package]]
+name = "glicol_parser"
+version = "0.14.0-dev"
+source = "git+https://github.com/lavaeater/glicol?branch=main#0317db2e3f157b911bfc28c72ad5db90db963f24"
+dependencies = [
+ "fasteval",
+ "hashbrown 0.14.5",
+ "pest",
+ "pest_derive",
+ "yoke",
 ]
 
 [[package]]
@@ -3857,6 +3882,22 @@ dependencies = [
  "dasp_signal",
  "dasp_slice",
  "fasteval",
+ "hashbrown 0.14.5",
+ "petgraph",
+ "rhai",
+]
+
+[[package]]
+name = "glicol_synth"
+version = "0.14.0-dev"
+source = "git+https://github.com/lavaeater/glicol?branch=main#0317db2e3f157b911bfc28c72ad5db90db963f24"
+dependencies = [
+ "dasp_interpolate",
+ "dasp_ring_buffer",
+ "dasp_signal",
+ "dasp_slice",
+ "fasteval",
+ "glicol_parser 0.14.0-dev",
  "hashbrown 0.14.5",
  "petgraph",
  "rhai",
@@ -7155,8 +7196,8 @@ dependencies = [
  "derive_deref",
  "directories",
  "futures",
- "glicol",
- "glicol_synth",
+ "glicol 0.13.5",
+ "glicol_synth 0.13.5",
  "hound",
  "human-panic",
  "json5",

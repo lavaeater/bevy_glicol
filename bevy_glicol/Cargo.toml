@@ -7,8 +7,8 @@ edition = "2021"
 anyhow = "1.0.82"
 bevy = "0.15.2"
 cpal = "0.15.3"
-glicol = "0.13.5"
-glicol_synth = "0.13.5" 
+glicol = { git="https://github.com/lavaeater/glicol", branch = "main" }
+glicol_synth = { git = "https://github.com/lavaeater/glicol", branch = "main" }
 parking_lot = "0.12.2"
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]
