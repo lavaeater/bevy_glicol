@@ -368,7 +368,7 @@ where
             prev_block_pos = BLOCK_SIZE;
             let mut engine = engine_clone.lock().unwrap();
             while writes < block_step {
-                let (block, err) = engine.next_block(vec![]);
+                let (block, _err) = engine.next_block(vec![]);
 
                 if writes + BLOCK_SIZE <= block_step {
                     for i in 0..BLOCK_SIZE {
