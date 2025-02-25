@@ -16,9 +16,20 @@
       <sourceFolder url="file://$MODULE_DIR$/tui_glicol/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/wasm/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/glicol-cli/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/glicol/rs/macros/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/glicol/rs/main/examples" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/glicol/rs/main/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/glicol/rs/main/tests" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/glicol/rs/parser/examples" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/glicol/rs/parser/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/glicol/rs/parser/tests" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/glicol/rs/synth/benches" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/glicol/rs/synth/examples" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/glicol/rs/synth/src" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/target" />
       <excludeFolder url="file://$MODULE_DIR$/tui_glicol/target" />
       <excludeFolder url="file://$MODULE_DIR$/glicol-cli/target" />
+      <excludeFolder url="file://$MODULE_DIR$/glicol/rs/target" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
