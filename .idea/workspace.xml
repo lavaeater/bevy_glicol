@@ -9,12 +9,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="3fc530a1-00aa-4333-8232-e39e75f97a43" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/bevy_glicol.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/bevy_glicol.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Cargo.toml" beforeDir="false" afterPath="$PROJECT_DIR$/Cargo.toml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/glicol" beforeDir="false" afterPath="$PROJECT_DIR$/glicol" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tui_glicol/Cargo.toml" beforeDir="false" afterPath="$PROJECT_DIR$/tui_glicol/Cargo.toml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -23,7 +18,7 @@
   </component>
   <component name="ExecutionTargetManager" SELECTED_TARGET="RsBuildProfile:dev" />
   <component name="Git.Settings">
-    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/glicol" />
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="MacroExpansionManager">
     <option name="directoryName" value="dIoRGs8A" />
@@ -47,7 +42,7 @@
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.git.unshallow": "true",
     "com.codeium.enabled": "true",
-    "git-widget-placeholder": "dev",
+    "git-widget-placeholder": "massacre",
     "last_opened_file_path": "/home/tommie/projects/games/bevy_glicol/glicol-cli",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
@@ -169,7 +164,7 @@
       <workItem from="1739983130957" duration="145000" />
       <workItem from="1739983285397" duration="5113000" />
       <workItem from="1740140203322" duration="1562000" />
-      <workItem from="1740491444680" duration="997000" />
+      <workItem from="1740491444680" duration="1422000" />
     </task>
     <servers />
   </component>
