@@ -9,7 +9,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="3fc530a1-00aa-4333-8232-e39e75f97a43" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/Cargo.toml" beforeDir="false" afterPath="$PROJECT_DIR$/Cargo.toml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/glicol" beforeDir="false" afterPath="$PROJECT_DIR$/glicol" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/glicol/rs/main/src/lib.rs" beforeDir="false" afterPath="$PROJECT_DIR$/glicol/rs/main/src/lib.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tui_glicol/src/app.rs" beforeDir="false" afterPath="$PROJECT_DIR$/tui_glicol/src/app.rs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -39,6 +41,7 @@
     "Cargo.Run glicol-cli.executor": "Run",
     "Cargo.Run tui-glicol.executor": "Run",
     "Cargo.Tests in 'glicol-cli'.executor": "Run",
+    "Cargo.Tests in 'tui_glicol'.executor": "Run",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.git.unshallow": "true",
     "com.codeium.enabled": "true",
@@ -70,7 +73,7 @@
     <option name="runOnTheFly" value="true" />
     <option name="tool" value="Clippy" />
   </component>
-  <component name="RunManager" selected="Cargo.Run glicol-cli">
+  <component name="RunManager" selected="Cargo.Run tui-glicol">
     <configuration name="Run glicol-cli" type="CargoCommandRunConfiguration" factoryName="Cargo Command" temporary="true">
       <option name="command" value="run --package glicol-cli --bin glicol-cli" />
       <option name="workingDirectory" value="file://$PROJECT_DIR$" />
@@ -142,8 +145,27 @@
         <option name="CARGO.BUILD_TASK_PROVIDER" enabled="true" />
       </method>
     </configuration>
+    <configuration name="Tests in 'tui_glicol'" type="CargoCommandRunConfiguration" factoryName="Cargo Command" temporary="true">
+      <option name="buildProfileId" value="dev" />
+      <option name="command" value="test --package tui-glicol" />
+      <option name="workingDirectory" value="file://$PROJECT_DIR$" />
+      <envs />
+      <option name="emulateTerminal" value="true" />
+      <option name="channel" value="DEFAULT" />
+      <option name="requiredFeatures" value="true" />
+      <option name="allFeatures" value="false" />
+      <option name="withSudo" value="false" />
+      <option name="buildTarget" value="REMOTE" />
+      <option name="backtrace" value="SHORT" />
+      <option name="isRedirectInput" value="false" />
+      <option name="redirectInputPath" value="" />
+      <method v="2">
+        <option name="CARGO.BUILD_TASK_PROVIDER" enabled="true" />
+      </method>
+    </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Cargo.Tests in 'tui_glicol'" />
         <item itemvalue="Cargo.Run glicol-cli" />
         <item itemvalue="Cargo.Tests in 'glicol-cli'" />
       </list>
@@ -164,7 +186,7 @@
       <workItem from="1739983130957" duration="145000" />
       <workItem from="1739983285397" duration="5113000" />
       <workItem from="1740140203322" duration="1562000" />
-      <workItem from="1740491444680" duration="1422000" />
+      <workItem from="1740491444680" duration="1856000" />
     </task>
     <servers />
   </component>

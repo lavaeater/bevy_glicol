@@ -20,9 +20,7 @@ use tracing::{debug, error, info};
 
 use crate::{
     action::Action,
-    components::{
-        graph::GraphComponent, home::Home, log_display::LogDisplay, Component,
-    },
+    components::{graph::GraphComponent, home::Home, log_display::LogDisplay, Component},
     config::Config,
     tui::{Event, Tui},
 };
@@ -100,8 +98,7 @@ impl App {
         }
         engine.set_bpm(120.0);
 
-        engine
-            .update_with_code(r#"out: saw 440.0 >> mul 0.1"#);
+        engine.update_with_code(r#"out: saw 440.0 >> mul 0.1"#);
         let engine = Arc::new(Mutex::new(engine));
 
         let mut graph_component = GraphComponent::new();
@@ -133,10 +130,7 @@ impl App {
 
         Ok(Self {
             frame_rate,
-            components: vec![
-                Box::new(Home::new()),
-                Box::new(graph_component.clone()),
-            ],
+            components: vec![Box::new(Home::new()), Box::new(graph_component.clone())],
             log_display: LogDisplay::default(),
             should_quit: false,
             should_suspend: false,
@@ -255,32 +249,19 @@ impl App {
                 }
                 Action::UpdateAudioCode(code) => {
                     if let Ok(mut engine) = self.engine.lock() {
-                        if engine.update_with_code(&code).is_ok() {
-                            self.graph_component
-                                .update_node_count(engine.context.graph.node_count());
-                        }
+                        engine.update_with_code(&code);
+                        self.graph_component
+                            .update_node_count(engine.context.graph.node_count());
                     }
                 }
                 Action::SpecialAudio => {
                     if let Ok(mut engine) = self.engine.lock() {
-                        match engine.update_with_code(SPECIAL) {
-                            Ok(_) => {
-                                engine.set_bpm(640.0);
-                                self
-                                    .graph_component
+                        engine.update_with_code(SPECIAL);
+                                self.graph_component
                                     .update_node_count(engine.context.graph.node_count());
-                                self
-                                    .graph_component
-                                    .update_bpm((*engine).get_bpm());
-                            },
-                            Err(e) => {
-                                let err_msg = format!("Failed to update SPECIAL Glicol code: {e}");
-                                error!("{err_msg}");
-                                self.log_display.add_error(err_msg);
+                                self.graph_component.update_bpm((*engine).get_bpm());
                             }
-                        }
                     }
-                }
                 _ => {}
             }
             for component in self.components.iter_mut() {
@@ -344,7 +325,7 @@ where
     let channels = 2_usize; //config.channels as usize;
 
     if let Ok(mut engine) = engine.lock() {
-        engine.set_sr(sr);
+        engine.set_sample_rate(sr);
         engine.livecoding = false;
         engine.set_bpm(120.0);
     }
@@ -387,7 +368,7 @@ where
             prev_block_pos = BLOCK_SIZE;
             let mut engine = engine_clone.lock().unwrap();
             while writes < block_step {
-                let block = engine.next_block(vec![]);
+                let (block, err) = engine.next_block(vec![]);
 
                 if writes + BLOCK_SIZE <= block_step {
                     for i in 0..BLOCK_SIZE {
