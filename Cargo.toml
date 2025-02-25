@@ -18,7 +18,7 @@ authors = [
 ]
 
 [workspace.dependencies]
-petgraph = { version = "0.7.1", features = ["stable_graph"] }
+petgraph = { version = "0.6.5", features = ["stable_graph"] }
 dasp_slice = { version = "0.11.0", default-features = false, features = [
     "std",
 ] }

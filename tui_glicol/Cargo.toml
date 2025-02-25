@@ -15,6 +15,7 @@ glicol = { path="../glicol/rs/main", features = [
     "use-meta",
 ] }
 glicol_synth = { path="../glicol/rs/synth", default-features = false }
+petgraph = "0.6"
 cpal = "0.15.2"
 better-panic = "0.3.0"
 clap = { version = "4.5.20", features = [
