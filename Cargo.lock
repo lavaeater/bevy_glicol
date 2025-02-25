@@ -3785,8 +3785,7 @@ dependencies = [
 [[package]]
 name = "glicol"
 version = "0.13.5"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6954afac8a8ac2d83c1d5d91905a347499a4ce2b6c541113b52e7669e9d292f9"
+source = "git+https://github.com/lavaeater/glicol?tag=v0.13.5#1596ee8ccbb7aa50d752a7e38b0a54f402e9c007"
 dependencies = [
  "glicol_macros",
  "glicol_parser 0.13.5",
@@ -3836,8 +3835,7 @@ dependencies = [
 [[package]]
 name = "glicol_macros"
 version = "0.13.5"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9883e6eb413088fe252c639e19ec9fc6e313585d1148ddf716f8b170388456e8"
+source = "git+https://github.com/lavaeater/glicol?tag=v0.13.5#1596ee8ccbb7aa50d752a7e38b0a54f402e9c007"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -3847,8 +3845,7 @@ dependencies = [
 [[package]]
 name = "glicol_parser"
 version = "0.13.5"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fe6ddadb71b61e261e3483d4345d3ead7380bf563fd15056ce61d05d87232e5d"
+source = "git+https://github.com/lavaeater/glicol?tag=v0.13.5#1596ee8ccbb7aa50d752a7e38b0a54f402e9c007"
 dependencies = [
  "fasteval",
  "glicol_macros",
@@ -3873,8 +3870,7 @@ dependencies = [
 [[package]]
 name = "glicol_synth"
 version = "0.13.5"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "670bcad1f71f489589f18ff5019ff796d5db302f8066c3bef5ff84b2f24cc27a"
+source = "git+https://github.com/lavaeater/glicol?tag=v0.13.5#1596ee8ccbb7aa50d752a7e38b0a54f402e9c007"
 dependencies = [
  "arrayvec",
  "dasp_interpolate",

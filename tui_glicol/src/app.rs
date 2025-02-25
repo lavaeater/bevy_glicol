@@ -271,7 +271,7 @@ impl App {
                                     .update_node_count(engine.context.graph.node_count());
                                 self
                                     .graph_component
-                                    .update_bpm(engine.get_bpm());
+                                    .update_bpm((*engine).get_bpm());
                             },
                             Err(e) => {
                                 let err_msg = format!("Failed to update SPECIAL Glicol code: {e}");
