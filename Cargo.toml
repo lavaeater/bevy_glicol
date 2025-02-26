@@ -1,7 +1,6 @@
 [workspace]
 members = ["tui_glicol",
     "bevy_glicol",
-    "glicol-cli",
     "glicol/rs/main",
     "glicol/rs/synth",
     "glicol/rs/parser",
