@@ -37,8 +37,8 @@ impl Node {
 
 #[derive(Debug, Clone, Default)]
 pub struct Graph {
-    nodes: HashMap<String, Node>,
-    registry: NodeRegistry,
+    pub nodes: HashMap<String, Node>,
+    pub registry: NodeRegistry,
 }
 
 impl Graph {
@@ -47,6 +47,14 @@ impl Graph {
             nodes: HashMap::new(),
             registry: NodeRegistry::new(),
         }
+    }
+
+    pub fn nodes(&self) -> &HashMap<String, Node> {
+        &self.nodes
+    }
+
+    pub fn nodes_mut(&mut self) -> &mut HashMap<String, Node> {
+        &mut self.nodes
     }
 
     pub fn add_node(&mut self, node: Node) -> Result<(), String> {
@@ -80,13 +88,13 @@ impl Graph {
     }
 
     pub fn validate_node_parameters(&self, node: &Node) -> Result<(), String> {
-        let definition = self.registry.get_definition(&node.node_type)
+        let definition = self
+            .registry
+            .get_definition(&node.node_type)
             .ok_or_else(|| format!("Unknown node type: {}", node.node_type))?;
 
         // Check if we have the right number of parameters
-        let required_params = definition.parameters.iter()
-            .filter(|p| !p.optional)
-            .count();
+        let required_params = definition.parameters.iter().filter(|p| !p.optional).count();
 
         if node.parameters.len() < required_params {
             return Err(format!(

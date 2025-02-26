@@ -100,15 +100,18 @@ impl App {
         }
         engine.set_bpm(120.0);
 
-        engine.update_with_code(r#"o: sin 440 >> mul ~mod;
-~mod: sin 1.2 >> mul 0.3 >> add 0.5;"#);
+        engine.update_with_code(
+            r#"o: sin 440 >> mul ~mod;
+~mod: sin 1.2 >> mul 0.3 >> add 0.5;"#,
+        );
         let engine = Arc::new(Mutex::new(engine));
 
-        let mut graph_component = GraphComponent::new();
+        let graph_component = GraphComponent::new();
 
-        if let Ok(engine) = engine.lock() {
-            // graph_component.update_ast(&engine.new_ast);
-        }
+        // Uncomment when ready to update AST
+        // if let Ok(engine) = engine.lock() {
+        //     graph_component.update_ast(&engine.new_ast);
+        // }
         let host = cpal::default_host();
         let device = match host.default_output_device() {
             Some(device) => device,
@@ -229,12 +232,13 @@ impl App {
     }
 
     fn handle_actions(&mut self, tui: &mut Tui) -> Result<()> {
+        let action_tx = self.action_tx.clone(); // Clone it once at the start
         while let Ok(action) = self.action_rx.try_recv() {
             if action != Action::Tick && action != Action::Render {
                 debug!("{action:?}");
             }
-            let action_for_components = action.clone();
-            match action {
+            let action_clone = action.clone();
+            match action_clone {
                 Action::Tick => {
                     self.last_tick_key_events.drain(..);
                 }
@@ -251,30 +255,37 @@ impl App {
                     }
                 }
                 // Graph actions
-                Action::GraphNextNode | Action::GraphPrevNode | 
-                Action::GraphNextCategory | Action::GraphPrevCategory | 
-                Action::GraphAddNode(_) | Action::GraphRemoveNode | 
-                Action::GraphConnectNodes(_, _) | Action::GraphEditParam(_, _, _) => {
-                    if let Ok(Some(new_action)) = self.graph_component.handle_action(action_for_components) {
+                Action::GraphNextNode
+                | Action::GraphPrevNode
+                | Action::GraphNextCategory
+                | Action::GraphPrevCategory
+                | Action::GraphAddNode(_)
+                | Action::GraphRemoveNode
+                | Action::GraphConnectNodes(_, _)
+                | Action::GraphEditParam(_, _, _) => {
+                    if let Ok(Some(new_action)) = self.graph_component.handle_action(action_clone) {
                         action_tx.send(new_action)?;
                     }
                 }
                 Action::GraphStartEditing => {
                     self.mode = Mode::GraphEditing;
-                    if let Ok(Some(new_action)) = self.graph_component.handle_action(action_for_components) {
+                    if let Ok(Some(new_action)) = self.graph_component.handle_action(action_clone) {
                         action_tx.send(new_action)?;
                     }
                 }
                 Action::GraphStopEditing => {
                     self.mode = Mode::Graph;
-                    if let Ok(Some(new_action)) = self.graph_component.handle_action(action_for_components) {
+                    if let Ok(Some(new_action)) = self.graph_component.handle_action(action_clone) {
                         action_tx.send(new_action)?;
                     }
                 }
                 Action::GraphShowError(_) | Action::GraphClearError => {
-                    if let Ok(Some(new_action)) = self.graph_component.handle_action(action_for_components) {
+                    if let Ok(Some(new_action)) = self.graph_component.handle_action(action_clone) {
                         action_tx.send(new_action)?;
                     }
+                }
+                Action::SwitchMode(mode) => {
+                    self.mode = mode;
                 }
                 Action::UpdateAudioCode(code) => {
                     if let Ok(mut engine) = self.engine.lock() {
@@ -292,7 +303,7 @@ impl App {
                 _ => {}
             }
             for component in self.components.iter_mut() {
-                if let Some(new_action) = component.update(action_for_components.clone())? {
+                if let Some(new_action) = component.update(action.clone())? {
                     self.action_tx.send(new_action)?
                 };
             }

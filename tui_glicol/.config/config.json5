@@ -9,11 +9,11 @@
       "<t>": "SpecialAudio", // SPECIAL
       "<s>": "StopAudio", // Stop playing audio
       "<u>": { "UpdateAudioCode": "out: saw 440.0 >> mul 0.1" }, // Update audio code (example)
-      "<g>": "Graph" // Switch to graph mode
+      "<g>": { "SwitchMode": "Graph" } // Switch to graph mode
     },
     "Graph": {
       "<q>": "Quit",
-      "<Esc>": "Home", // Return to home mode
+      "<Esc>": { "SwitchMode": "Home" }, // Return to home mode
       "<j>": "GraphNextNode", // Select next node
       "<k>": "GraphPrevNode", // Select previous node
       "<l>": "GraphNextCategory", // Next category

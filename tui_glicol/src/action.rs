@@ -1,6 +1,8 @@
 use serde::{Deserialize, Serialize};
 use strum::Display;
 
+use crate::app::Mode;
+
 #[derive(Debug, Clone, PartialEq, Eq, Display, Serialize, Deserialize)]
 pub enum Action {
     Tick,
@@ -27,6 +29,9 @@ pub enum Action {
     GraphEditParam(String, usize, String), // node_id, param_index, value
     GraphStartEditing,
     GraphStopEditing,
+    GraphNextParam,
+    GraphPrevParam,
     GraphShowError(String),
     GraphClearError,
+    SwitchMode(Mode),
 }

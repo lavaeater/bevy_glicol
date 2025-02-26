@@ -1,5 +1,4 @@
 use std::fmt::{Display, Formatter};
-use glicol_synth::GlicolPara;
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum ParameterType {
@@ -49,6 +48,7 @@ pub enum NodeCategory {
     Utility,
 }
 
+#[derive(Clone, Debug)]
 pub struct NodeRegistry {
     definitions: Vec<NodeTypeDefinition>,
 }
@@ -93,14 +93,12 @@ impl NodeRegistry {
         ] {
             self.definitions.push(NodeTypeDefinition {
                 name: name.to_string(),
-                parameters: vec![
-                    NodeParameter {
-                        name: "frequency".to_string(),
-                        parameter_type: ParameterType::Number,
-                        optional: false,
-                        description: "Frequency in Hz".to_string(),
-                    }
-                ],
+                parameters: vec![NodeParameter {
+                    name: "frequency".to_string(),
+                    parameter_type: ParameterType::Number,
+                    optional: false,
+                    description: "Frequency in Hz".to_string(),
+                }],
                 description: desc.to_string(),
                 category: NodeCategory::Oscillator,
             });
@@ -126,7 +124,7 @@ impl NodeRegistry {
                         parameter_type: ParameterType::Number,
                         optional: false,
                         description: "Amplitude (0-1)".to_string(),
-                    }
+                    },
                 ],
                 description: desc.to_string(),
                 category: NodeCategory::Oscillator,
@@ -150,7 +148,7 @@ impl NodeRegistry {
                     parameter_type: ParameterType::Number,
                     optional: false,
                     description: "Resonance/Q factor".to_string(),
-                }
+                },
             ],
             description: "Low-pass filter".to_string(),
             category: NodeCategory::Filter,
@@ -171,7 +169,7 @@ impl NodeRegistry {
                     parameter_type: ParameterType::Number,
                     optional: false,
                     description: "Resonance/Q factor".to_string(),
-                }
+                },
             ],
             description: "High-pass filter".to_string(),
             category: NodeCategory::Filter,
@@ -180,14 +178,12 @@ impl NodeRegistry {
         // One-pole filter
         self.definitions.push(NodeTypeDefinition {
             name: "onepole".to_string(),
-            parameters: vec![
-                NodeParameter {
-                    name: "coefficient".to_string(),
-                    parameter_type: ParameterType::Number,
-                    optional: false,
-                    description: "Filter coefficient".to_string(),
-                }
-            ],
+            parameters: vec![NodeParameter {
+                name: "coefficient".to_string(),
+                parameter_type: ParameterType::Number,
+                optional: false,
+                description: "Filter coefficient".to_string(),
+            }],
             description: "One-pole filter".to_string(),
             category: NodeCategory::Filter,
         });
@@ -227,7 +223,7 @@ impl NodeRegistry {
                     parameter_type: ParameterType::Number,
                     optional: false,
                     description: "Stereo width".to_string(),
-                }
+                },
             ],
             description: "Reverb effect".to_string(),
             category: NodeCategory::Effect,
@@ -236,14 +232,12 @@ impl NodeRegistry {
         // Delay
         self.definitions.push(NodeTypeDefinition {
             name: "delay".to_string(),
-            parameters: vec![
-                NodeParameter {
-                    name: "time".to_string(),
-                    parameter_type: ParameterType::Number,
-                    optional: false,
-                    description: "Delay time in seconds".to_string(),
-                }
-            ],
+            parameters: vec![NodeParameter {
+                name: "time".to_string(),
+                parameter_type: ParameterType::Number,
+                optional: false,
+                description: "Delay time in seconds".to_string(),
+            }],
             description: "Delay effect".to_string(),
             category: NodeCategory::Effect,
         });
@@ -251,14 +245,12 @@ impl NodeRegistry {
         // Pan
         self.definitions.push(NodeTypeDefinition {
             name: "pan".to_string(),
-            parameters: vec![
-                NodeParameter {
-                    name: "position".to_string(),
-                    parameter_type: ParameterType::Number,
-                    optional: false,
-                    description: "Pan position (-1 to 1)".to_string(),
-                }
-            ],
+            parameters: vec![NodeParameter {
+                name: "position".to_string(),
+                parameter_type: ParameterType::Number,
+                optional: false,
+                description: "Pan position (-1 to 1)".to_string(),
+            }],
             description: "Stereo panner".to_string(),
             category: NodeCategory::Effect,
         });
@@ -267,19 +259,22 @@ impl NodeRegistry {
     fn register_math_ops(&mut self) {
         // Basic math operations
         for (name, desc, param_name, param_desc) in [
-            ("mul", "Multiply input by a constant", "factor", "Multiplication factor"),
+            (
+                "mul",
+                "Multiply input by a constant",
+                "factor",
+                "Multiplication factor",
+            ),
             ("add", "Add a constant to input", "value", "Value to add"),
         ] {
             self.definitions.push(NodeTypeDefinition {
                 name: name.to_string(),
-                parameters: vec![
-                    NodeParameter {
-                        name: param_name.to_string(),
-                        parameter_type: ParameterType::Number,
-                        optional: false,
-                        description: param_desc.to_string(),
-                    }
-                ],
+                parameters: vec![NodeParameter {
+                    name: param_name.to_string(),
+                    parameter_type: ParameterType::Number,
+                    optional: false,
+                    description: param_desc.to_string(),
+                }],
                 description: desc.to_string(),
                 category: NodeCategory::Math,
             });
@@ -302,7 +297,7 @@ impl NodeRegistry {
                     parameter_type: ParameterType::Number,
                     optional: false,
                     description: "Release time in seconds".to_string(),
-                }
+                },
             ],
             description: "Percussive envelope".to_string(),
             category: NodeCategory::Modulator,
@@ -335,7 +330,7 @@ impl NodeRegistry {
                     parameter_type: ParameterType::Number,
                     optional: false,
                     description: "Release time in seconds".to_string(),
-                }
+                },
             ],
             description: "ADSR envelope".to_string(),
             category: NodeCategory::Modulator,
@@ -344,14 +339,12 @@ impl NodeRegistry {
         // Sequencer
         self.definitions.push(NodeTypeDefinition {
             name: "seq".to_string(),
-            parameters: vec![
-                NodeParameter {
-                    name: "pattern".to_string(),
-                    parameter_type: ParameterType::Pattern,
-                    optional: false,
-                    description: "Sequence pattern".to_string(),
-                }
-            ],
+            parameters: vec![NodeParameter {
+                name: "pattern".to_string(),
+                parameter_type: ParameterType::Pattern,
+                optional: false,
+                description: "Sequence pattern".to_string(),
+            }],
             description: "Pattern sequencer".to_string(),
             category: NodeCategory::Modulator,
         });
@@ -361,14 +354,12 @@ impl NodeRegistry {
         // Speed control
         self.definitions.push(NodeTypeDefinition {
             name: "speed".to_string(),
-            parameters: vec![
-                NodeParameter {
-                    name: "rate".to_string(),
-                    parameter_type: ParameterType::Number,
-                    optional: false,
-                    description: "Playback rate multiplier".to_string(),
-                }
-            ],
+            parameters: vec![NodeParameter {
+                name: "rate".to_string(),
+                parameter_type: ParameterType::Number,
+                optional: false,
+                description: "Playback rate multiplier".to_string(),
+            }],
             description: "Speed/rate control".to_string(),
             category: NodeCategory::Utility,
         });
@@ -376,14 +367,12 @@ impl NodeRegistry {
         // Constant value
         self.definitions.push(NodeTypeDefinition {
             name: "const".to_string(),
-            parameters: vec![
-                NodeParameter {
-                    name: "value".to_string(),
-                    parameter_type: ParameterType::Number,
-                    optional: false,
-                    description: "Constant value".to_string(),
-                }
-            ],
+            parameters: vec![NodeParameter {
+                name: "value".to_string(),
+                parameter_type: ParameterType::Number,
+                optional: false,
+                description: "Constant value".to_string(),
+            }],
             description: "Constant value generator".to_string(),
             category: NodeCategory::Utility,
         });
@@ -393,14 +382,12 @@ impl NodeRegistry {
         // Mix inputs
         self.definitions.push(NodeTypeDefinition {
             name: "mix".to_string(),
-            parameters: vec![
-                NodeParameter {
-                    name: "inputs".to_string(),
-                    parameter_type: ParameterType::Reference,
-                    optional: false,
-                    description: "Input nodes to mix".to_string(),
-                }
-            ],
+            parameters: vec![NodeParameter {
+                name: "inputs".to_string(),
+                parameter_type: ParameterType::Reference,
+                optional: false,
+                description: "Input nodes to mix".to_string(),
+            }],
             description: "Mix multiple inputs".to_string(),
             category: NodeCategory::IO,
         });
@@ -412,7 +399,6 @@ impl NodeRegistry {
             description: "Audio output".to_string(),
             category: NodeCategory::IO,
         });
-    }
     }
 }
 

@@ -11,7 +11,7 @@ use ratatui::{
 };
 use uuid::Uuid;
 
-use crate::graph::{Graph, Node, NodeCategory, NodeRegistry, ParameterType};
+use crate::graph::{Graph, Node, ParameterType};
 
 use crate::action::Action;
 
@@ -40,14 +40,15 @@ impl GraphComponent {
     }
 
     pub fn handle_action(&mut self, action: Action) -> Result<Option<Action>, String> {
-        match action {
+        let result = match action {
             Action::GraphNextNode => {
                 let nodes: Vec<_> = self.graph.nodes().keys().cloned().collect();
                 if nodes.is_empty() {
                     return Ok(None);
                 }
 
-                let current_idx = self.selected_node_id
+                let current_idx = self
+                    .selected_node_id
                     .as_ref()
                     .and_then(|id| nodes.iter().position(|n| n == id))
                     .unwrap_or(0);
@@ -55,6 +56,7 @@ impl GraphComponent {
                 let next_idx = (current_idx + 1) % nodes.len();
                 self.selected_node_id = Some(nodes[next_idx].clone());
                 self.selected_param = None;
+                None
             }
 
             Action::GraphPrevNode => {
@@ -63,24 +65,28 @@ impl GraphComponent {
                     return Ok(None);
                 }
 
-                let current_idx = self.selected_node_id
+                let current_idx = self
+                    .selected_node_id
                     .as_ref()
                     .and_then(|id| nodes.iter().position(|n| n == id))
                     .unwrap_or(0);
 
-                let next_idx = if current_idx == 0 {
+                let prev_idx = if current_idx == 0 {
                     nodes.len() - 1
                 } else {
                     current_idx - 1
                 };
-                self.selected_node_id = Some(nodes[next_idx].clone());
+
+                self.selected_node_id = Some(nodes[prev_idx].clone());
                 self.selected_param = None;
+                None
             }
 
             Action::GraphNextCategory => {
                 let categories = 7; // Total number of categories
                 let current = self.selected_category.unwrap_or(0);
                 self.selected_category = Some((current + 1) % categories);
+                None
             }
 
             Action::GraphPrevCategory => {
@@ -91,59 +97,72 @@ impl GraphComponent {
                 } else {
                     current - 1
                 });
+                None
             }
 
-            Action::GraphAddNode(node_type) => {
-                match self.add_node(&node_type, (0.0, 0.0)) {
-                    Ok(id) => {
-                        self.selected_node_id = Some(id);
-                        self.error = None;
-                    }
-                    Err(e) => {
-                        return Ok(Some(Action::GraphShowError(e)));
-                    }
+            Action::GraphAddNode(node_type) => match self.add_node(&node_type, (0.0, 0.0)) {
+                Ok(id) => {
+                    self.selected_node_id = Some(id);
+                    self.error = None;
+                    None
                 }
-            }
+                Err(e) => {
+                    return Ok(Some(Action::GraphShowError(e)));
+                }
+            },
 
             Action::GraphRemoveNode => {
                 self.remove_selected_node();
                 self.selected_param = None;
+                None
             }
 
             Action::GraphConnectNodes(from_id, to_id) => {
                 if let Err(e) = self.connect_nodes(&from_id, &to_id) {
                     return Ok(Some(Action::GraphShowError(e)));
                 }
+                None
             }
 
             Action::GraphEditParam(node_id, param_idx, value) => {
-                if let Some(node) = self.graph.nodes_mut().get_mut(&node_id) {
-                    let definition = self.graph.get_registry().get_definition(&node.node_type)
-                        .ok_or_else(|| format!("Unknown node type: {}", node.node_type))?;
+                // First get the node type
+                let node_type = if let Some(node) = self.graph.nodes().get(&node_id) {
+                    node.node_type.clone()
+                } else {
+                    return Ok(None);
+                };
 
-                    if param_idx >= definition.parameters.len() {
-                        return Ok(Some(Action::GraphShowError(
-                            format!("Invalid parameter index: {}", param_idx)
-                        )));
-                    }
+                // Then get the definition
+                let definition = self.graph.get_registry()
+                    .get_definition(&node_type)
+                    .ok_or_else(|| format!("Unknown node type: {}", node_type))?;
 
-                    // Parse the value based on parameter type
-                    let param = &definition.parameters[param_idx];
-                    let glicol_param = match param.parameter_type {
-                        ParameterType::Number => {
-                            match value.parse::<f32>() {
-                                Ok(n) => GlicolPara::Number(n),
-                                Err(_) => return Ok(Some(Action::GraphShowError(
-                                    format!("Invalid number: {}", value)
-                                ))),
-                            }
+                // Validate parameter index
+                if param_idx >= definition.parameters.len() {
+                    return Ok(Some(Action::GraphShowError(
+                        format!("Invalid parameter index: {}", param_idx)
+                    )));
+                }
+
+                // Parse the value based on parameter type
+                let param = &definition.parameters[param_idx];
+                let glicol_param = match param.parameter_type {
+                    ParameterType::Number => {
+                        match value.parse::<f32>() {
+                            Ok(n) => GlicolPara::Number(n),
+                            Err(_) => return Ok(Some(Action::GraphShowError(
+                                format!("Invalid number: {}", value)
+                            ))),
                         }
-                        ParameterType::Reference => GlicolPara::Reference(value),
-                        _ => return Ok(Some(Action::GraphShowError(
-                            format!("Unsupported parameter type: {:?}", param.parameter_type)
-                        ))),
-                    };
+                    }
+                    ParameterType::Reference => GlicolPara::Reference(value),
+                    _ => return Ok(Some(Action::GraphShowError(
+                        format!("Unsupported parameter type: {:?}", param.parameter_type)
+                    ))),
+                };
 
+                // Now we can mutably borrow the node and update its parameters
+                if let Some(node) = self.graph.nodes_mut().get_mut(&node_id) {
                     // Ensure we have enough space in parameters vector
                     while node.parameters.len() <= param_idx {
                         node.parameters.push(GlicolPara::Number(0.0));
@@ -151,28 +170,89 @@ impl GraphComponent {
                     node.parameters[param_idx] = glicol_param;
                     self.error = None;
                 }
+                None
             }
 
             Action::GraphStartEditing => {
                 self.editing = true;
-            }
+                None
+            },
 
             Action::GraphStopEditing => {
                 self.editing = false;
-            }
+                self.selected_param = None;
+                None
+            },
+
+            Action::GraphNextParam => {
+                if !self.editing {
+                    return Ok(None);
+                }
+
+                if let Some(node_id) = self.selected_node_id.clone() {
+                    if let Some(node) = self.graph.nodes().get(&node_id) {
+                        let definition = self.graph.get_registry()
+                            .get_definition(&node.node_type)
+                            .ok_or_else(|| format!("Unknown node type: {}", node.node_type))?;
+
+                        let current_idx = self.selected_param
+                            .as_ref()
+                            .map(|(_, idx)| *idx)
+                            .unwrap_or(0);
+                        
+                        let next_idx = if current_idx + 1 >= definition.parameters.len() {
+                            0
+                        } else {
+                            current_idx + 1
+                        };
+
+                        self.selected_param = Some((node_id.clone(), next_idx));
+                    }
+                }
+                None
+            },
+
+            Action::GraphPrevParam => {
+                if !self.editing {
+                    return Ok(None);
+                }
+
+                if let Some(node_id) = self.selected_node_id.clone() {
+                    if let Some(node) = self.graph.nodes().get(&node_id) {
+                        let definition = self.graph.get_registry()
+                            .get_definition(&node.node_type)
+                            .ok_or_else(|| format!("Unknown node type: {}", node.node_type))?;
+
+                        let current_idx = self.selected_param
+                            .as_ref()
+                            .map(|(_, idx)| *idx)
+                            .unwrap_or(0);
+                        
+                        let prev_idx = if current_idx == 0 {
+                            definition.parameters.len().saturating_sub(1)
+                        } else {
+                            current_idx - 1
+                        };
+
+                        self.selected_param = Some((node_id.clone(), prev_idx));
+                    }
+                }
+                None
+            },
 
             Action::GraphShowError(error) => {
                 self.error = Some(error);
-            }
+                None
+            },
 
             Action::GraphClearError => {
                 self.error = None;
-            }
+                None
+            },
 
-            _ => return Ok(None),
-        }
-
-        Ok(None)
+            _ => None,
+        };
+        Ok(result)
     }
 
     pub fn get_ast(&self) -> HashMap<String, (Vec<String>, Vec<Vec<GlicolPara>>)> {
@@ -206,11 +286,11 @@ impl Component for GraphComponent {
         let layout = Layout::default()
             .direction(Direction::Vertical)
             .constraints([
-                Constraint::Length(3),    // Title
-                Constraint::Length(3),    // Categories
-                Constraint::Min(0),       // Main content
-                Constraint::Length(10),   // Node details/parameters
-                Constraint::Length(1),    // Error display
+                Constraint::Length(3),  // Title
+                Constraint::Length(3),  // Categories
+                Constraint::Min(0),     // Main content
+                Constraint::Length(10), // Node details/parameters
+                Constraint::Length(1),  // Error display
             ])
             .split(area);
 
@@ -261,12 +341,16 @@ impl GraphComponent {
             .title("Nodes")
             .style(Style::default());
 
-        let items: Vec<ListItem> = self.graph
+        let items: Vec<ListItem> = self
+            .graph
             .nodes()
             .iter()
             .map(|(id, node)| {
                 let mut style = Style::default();
-                let definition = self.graph.get_registry().get_definition(&node.node_type)
+                // Verify the node type exists
+                self.graph
+                    .get_registry()
+                    .get_definition(&node.node_type)
                     .unwrap_or_else(|| panic!("Unknown node type: {}", node.node_type));
 
                 let prefix = if Some(id) == self.selected_node_id.as_ref() {
@@ -309,7 +393,8 @@ impl GraphComponent {
 
         let content = if let Some(node_id) = &self.selected_node_id {
             if let Some(node) = self.graph.nodes().get(node_id) {
-                if let Some(definition) = self.graph.get_registry().get_definition(&node.node_type) {
+                if let Some(definition) = self.graph.get_registry().get_definition(&node.node_type)
+                {
                     let mut text = Text::from(vec![
                         Line::from(vec![
                             Span::raw("Type: "),
@@ -317,10 +402,16 @@ impl GraphComponent {
                         ]),
                         Line::from(vec![
                             Span::raw("Category: "),
-                            Span::styled(format!("{:?}", definition.category), Style::default().fg(Color::Yellow)),
+                            Span::styled(
+                                format!("{:?}", definition.category),
+                                Style::default().fg(Color::Yellow),
+                            ),
                         ]),
                         Line::from(Span::raw("")),
-                        Line::from(Span::styled("Parameters:", Style::default().add_modifier(Modifier::BOLD))),
+                        Line::from(Span::styled(
+                            "Parameters:",
+                            Style::default().add_modifier(Modifier::BOLD),
+                        )),
                     ]);
 
                     for (i, param) in definition.parameters.iter().enumerate() {
@@ -330,9 +421,19 @@ impl GraphComponent {
                             "[not set]".to_string()
                         };
 
-                        let (prefix, style) = if self.editing && 
-                            self.selected_param.map(|(id, idx)| id == *node_id && idx == i).unwrap_or(false) {
-                            (">", Style::default().fg(Color::Yellow).add_modifier(Modifier::BOLD))
+                        let (prefix, style) = if self.editing
+                            && self
+                                .selected_param
+                                .as_ref()
+                                .map(|(id, idx)| id == node_id && *idx == i)
+                                .unwrap_or(false)
+                        {
+                            (
+                                ">",
+                                Style::default()
+                                    .fg(Color::Yellow)
+                                    .add_modifier(Modifier::BOLD),
+                            )
                         } else {
                             (" ", Style::default().fg(Color::Green))
                         };
@@ -350,7 +451,10 @@ impl GraphComponent {
                         text.extend(Text::from(Line::from(vec![
                             Span::styled("Press ", Style::default().fg(Color::DarkGray)),
                             Span::styled("Enter", Style::default().fg(Color::White)),
-                            Span::styled(" to edit parameter, ", Style::default().fg(Color::DarkGray)),
+                            Span::styled(
+                                " to edit parameter, ",
+                                Style::default().fg(Color::DarkGray),
+                            ),
                             Span::styled("Esc", Style::default().fg(Color::White)),
                             Span::styled(" to cancel", Style::default().fg(Color::DarkGray)),
                         ])));
@@ -385,26 +489,5 @@ impl GraphComponent {
                 .wrap(ratatui::widgets::Wrap { trim: true });
             f.render_widget(paragraph, area);
         }
-    }
-                                .collect::<Vec<_>>()
-                                .join(", ")
-                        ))
-                        .collect::<Vec<_>>()
-                        .join(", ")
-                );
-                ListItem::new(content).style(Style::default().fg(if i == 0 {
-                    Color::Yellow
-                } else {
-                    Color::White
-                }))
-            })
-            .collect();
-
-        let list = List::new(items)
-            .block(content_block)
-            .highlight_style(Style::default().fg(Color::LightGreen));
-        f.render_widget(list, layout[1]);
-
-        Ok(())
     }
 }
