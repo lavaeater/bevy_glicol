@@ -11,12 +11,15 @@
     <list default="true" id="3fc530a1-00aa-4333-8232-e39e75f97a43" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Cargo.lock" beforeDir="false" afterPath="$PROJECT_DIR$/Cargo.lock" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Cargo.toml" beforeDir="false" afterPath="$PROJECT_DIR$/Cargo.toml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/glicol" beforeDir="false" afterPath="$PROJECT_DIR$/glicol" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/glicol/rs/main/src/lib.rs" beforeDir="false" afterPath="$PROJECT_DIR$/glicol/rs/main/src/lib.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/glicol/rs/parser/src/lib.rs" beforeDir="false" afterPath="$PROJECT_DIR$/glicol/rs/parser/src/lib.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/glicol/rs/synth/src/graph.rs" beforeDir="false" afterPath="$PROJECT_DIR$/glicol/rs/synth/src/graph.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/glicol/rs/synth/src/lib.rs" beforeDir="false" afterPath="$PROJECT_DIR$/glicol/rs/synth/src/lib.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/tui_glicol/Cargo.toml" beforeDir="false" afterPath="$PROJECT_DIR$/tui_glicol/Cargo.toml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/tui_glicol/src/app.rs" beforeDir="false" afterPath="$PROJECT_DIR$/tui_glicol/src/app.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/tui_glicol/src/components/graph.rs" beforeDir="false" afterPath="$PROJECT_DIR$/tui_glicol/src/components/graph.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tui_glicol/src/main.rs" beforeDir="false" afterPath="$PROJECT_DIR$/tui_glicol/src/main.rs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -24,6 +27,13 @@
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
   <component name="ExecutionTargetManager" SELECTED_TARGET="RsBuildProfile:dev" />
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Rust File" />
+      </list>
+    </option>
+  </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
@@ -34,7 +44,9 @@
   &quot;associatedIndex&quot;: 4
 }</component>
   <component name="ProjectId" id="2tBcoE34FrCWIRF0SOmMLteBJRU" />
-  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true">
+    <ConfirmationsSetting value="1" id="Add" />
+  </component>
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
@@ -192,7 +204,8 @@
       <workItem from="1739983285397" duration="5113000" />
       <workItem from="1740140203322" duration="1562000" />
       <workItem from="1740491444680" duration="1856000" />
-      <workItem from="1740500303718" duration="1065000" />
+      <workItem from="1740500303718" duration="5419000" />
+      <workItem from="1740565434998" duration="4769000" />
     </task>
     <servers />
   </component>

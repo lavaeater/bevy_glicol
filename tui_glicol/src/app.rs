@@ -42,7 +42,7 @@ pub struct App {
     action_rx: mpsc::UnboundedReceiver<Action>,
     engine: Arc<Mutex<Engine<BLOCK_SIZE>>>,
     stream: Option<cpal::Stream>,
-    graph_component: GraphComponent<BLOCK_SIZE>,
+    graph_component: GraphComponent,
     log_display: LogDisplay,
 }
 
@@ -98,13 +98,14 @@ impl App {
         }
         engine.set_bpm(120.0);
 
-        engine.update_with_code(r#"out: saw 440.0 >> mul 0.1"#);
+        engine.update_with_code(r#"o: sin 440 >> mul ~mod;
+~mod: sin 1.2 >> mul 0.3 >> add 0.5;"#);
         let engine = Arc::new(Mutex::new(engine));
 
         let mut graph_component = GraphComponent::new();
 
         if let Ok(engine) = engine.lock() {
-            graph_component.update_node_count(engine.context.graph.node_count());
+            // graph_component.update_ast(&engine.new_ast);
         }
         let host = cpal::default_host();
         let device = match host.default_output_device() {
@@ -250,18 +251,16 @@ impl App {
                 Action::UpdateAudioCode(code) => {
                     if let Ok(mut engine) = self.engine.lock() {
                         engine.update_with_code(&code);
-                        self.graph_component
-                            .update_node_count(engine.context.graph.node_count());
+                        // self.graph_component.update_ast(&engine.new_ast);
                     }
                 }
                 Action::SpecialAudio => {
                     if let Ok(mut engine) = self.engine.lock() {
                         engine.update_with_code(SPECIAL);
-                                self.graph_component
-                                    .update_node_count(engine.context.graph.node_count());
-                                self.graph_component.update_bpm((*engine).get_bpm());
-                            }
+                        // self.graph_component.update_ast(&engine.new_ast);
+                        self.graph_component.update_bpm((*engine).get_bpm());
                     }
+                }
                 _ => {}
             }
             for component in self.components.iter_mut() {

@@ -7713,6 +7713,7 @@ dependencies = [
  "futures",
  "glicol 0.13.5",
  "glicol_synth 0.13.5",
+ "hashbrown 0.15.2",
  "hound",
  "human-panic",
  "json5",
@@ -7732,6 +7733,7 @@ dependencies = [
  "tracing",
  "tracing-error",
  "tracing-subscriber",
+ "uuid",
  "vergen-gix",
 ]
 

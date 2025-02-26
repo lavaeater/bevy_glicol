@@ -49,8 +49,10 @@ tokio-util = "0.7.12"
 tracing = "0.1.40"
 tracing-error = "0.2.0"
 tracing-subscriber = { version = "0.3.18", features = ["env-filter", "serde"] }
+uuid = { version = "1.7.0", features = ["v4"] }
 parking_lot = "0.12.2"
 anyhow = "1.0.90"
+hashbrown = "0.15.2"
 
 [build-dependencies]
 anyhow = "1.0.90"
