@@ -16,4 +16,17 @@ pub enum Action {
     SpecialAudio,
     PlayAudio,
     StopAudio,
+    // Graph actions
+    GraphNextNode,
+    GraphPrevNode,
+    GraphNextCategory,
+    GraphPrevCategory,
+    GraphAddNode(String), // node_type
+    GraphRemoveNode,
+    GraphConnectNodes(String, String), // from_id, to_id
+    GraphEditParam(String, usize, String), // node_id, param_index, value
+    GraphStartEditing,
+    GraphStopEditing,
+    GraphShowError(String),
+    GraphClearError,
 }

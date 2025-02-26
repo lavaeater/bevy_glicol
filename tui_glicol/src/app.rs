@@ -50,6 +50,8 @@ pub struct App {
 pub enum Mode {
     #[default]
     Home,
+    Graph,
+    GraphEditing,
 }
 
 impl App {
@@ -246,6 +248,32 @@ impl App {
                 Action::StopAudio => {
                     if let Some(stream) = self.stream.take() {
                         drop(stream);
+                    }
+                }
+                // Graph actions
+                Action::GraphNextNode | Action::GraphPrevNode | 
+                Action::GraphNextCategory | Action::GraphPrevCategory | 
+                Action::GraphAddNode(_) | Action::GraphRemoveNode | 
+                Action::GraphConnectNodes(_, _) | Action::GraphEditParam(_, _, _) => {
+                    if let Ok(Some(new_action)) = self.graph_component.handle_action(action_for_components) {
+                        action_tx.send(new_action)?;
+                    }
+                }
+                Action::GraphStartEditing => {
+                    self.mode = Mode::GraphEditing;
+                    if let Ok(Some(new_action)) = self.graph_component.handle_action(action_for_components) {
+                        action_tx.send(new_action)?;
+                    }
+                }
+                Action::GraphStopEditing => {
+                    self.mode = Mode::Graph;
+                    if let Ok(Some(new_action)) = self.graph_component.handle_action(action_for_components) {
+                        action_tx.send(new_action)?;
+                    }
+                }
+                Action::GraphShowError(_) | Action::GraphClearError => {
+                    if let Ok(Some(new_action)) = self.graph_component.handle_action(action_for_components) {
+                        action_tx.send(new_action)?;
                     }
                 }
                 Action::UpdateAudioCode(code) => {

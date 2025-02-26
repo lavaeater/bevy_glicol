@@ -13,6 +13,8 @@ use uuid::Uuid;
 
 use crate::graph::{Graph, Node, NodeCategory, NodeRegistry, ParameterType};
 
+use crate::action::Action;
+
 #[derive(Clone)]
 pub struct GraphComponent {
     graph: Graph,
@@ -21,6 +23,7 @@ pub struct GraphComponent {
     selected_category: Option<usize>,
     editing: bool,
     bpm: f32,
+    error: Option<String>,
 }
 
 impl GraphComponent {
@@ -32,7 +35,144 @@ impl GraphComponent {
             selected_category: None,
             editing: false,
             bpm: 120.0,
+            error: None,
         }
+    }
+
+    pub fn handle_action(&mut self, action: Action) -> Result<Option<Action>, String> {
+        match action {
+            Action::GraphNextNode => {
+                let nodes: Vec<_> = self.graph.nodes().keys().cloned().collect();
+                if nodes.is_empty() {
+                    return Ok(None);
+                }
+
+                let current_idx = self.selected_node_id
+                    .as_ref()
+                    .and_then(|id| nodes.iter().position(|n| n == id))
+                    .unwrap_or(0);
+
+                let next_idx = (current_idx + 1) % nodes.len();
+                self.selected_node_id = Some(nodes[next_idx].clone());
+                self.selected_param = None;
+            }
+
+            Action::GraphPrevNode => {
+                let nodes: Vec<_> = self.graph.nodes().keys().cloned().collect();
+                if nodes.is_empty() {
+                    return Ok(None);
+                }
+
+                let current_idx = self.selected_node_id
+                    .as_ref()
+                    .and_then(|id| nodes.iter().position(|n| n == id))
+                    .unwrap_or(0);
+
+                let next_idx = if current_idx == 0 {
+                    nodes.len() - 1
+                } else {
+                    current_idx - 1
+                };
+                self.selected_node_id = Some(nodes[next_idx].clone());
+                self.selected_param = None;
+            }
+
+            Action::GraphNextCategory => {
+                let categories = 7; // Total number of categories
+                let current = self.selected_category.unwrap_or(0);
+                self.selected_category = Some((current + 1) % categories);
+            }
+
+            Action::GraphPrevCategory => {
+                let categories = 7; // Total number of categories
+                let current = self.selected_category.unwrap_or(0);
+                self.selected_category = Some(if current == 0 {
+                    categories - 1
+                } else {
+                    current - 1
+                });
+            }
+
+            Action::GraphAddNode(node_type) => {
+                match self.add_node(&node_type, (0.0, 0.0)) {
+                    Ok(id) => {
+                        self.selected_node_id = Some(id);
+                        self.error = None;
+                    }
+                    Err(e) => {
+                        return Ok(Some(Action::GraphShowError(e)));
+                    }
+                }
+            }
+
+            Action::GraphRemoveNode => {
+                self.remove_selected_node();
+                self.selected_param = None;
+            }
+
+            Action::GraphConnectNodes(from_id, to_id) => {
+                if let Err(e) = self.connect_nodes(&from_id, &to_id) {
+                    return Ok(Some(Action::GraphShowError(e)));
+                }
+            }
+
+            Action::GraphEditParam(node_id, param_idx, value) => {
+                if let Some(node) = self.graph.nodes_mut().get_mut(&node_id) {
+                    let definition = self.graph.get_registry().get_definition(&node.node_type)
+                        .ok_or_else(|| format!("Unknown node type: {}", node.node_type))?;
+
+                    if param_idx >= definition.parameters.len() {
+                        return Ok(Some(Action::GraphShowError(
+                            format!("Invalid parameter index: {}", param_idx)
+                        )));
+                    }
+
+                    // Parse the value based on parameter type
+                    let param = &definition.parameters[param_idx];
+                    let glicol_param = match param.parameter_type {
+                        ParameterType::Number => {
+                            match value.parse::<f32>() {
+                                Ok(n) => GlicolPara::Number(n),
+                                Err(_) => return Ok(Some(Action::GraphShowError(
+                                    format!("Invalid number: {}", value)
+                                ))),
+                            }
+                        }
+                        ParameterType::Reference => GlicolPara::Reference(value),
+                        _ => return Ok(Some(Action::GraphShowError(
+                            format!("Unsupported parameter type: {:?}", param.parameter_type)
+                        ))),
+                    };
+
+                    // Ensure we have enough space in parameters vector
+                    while node.parameters.len() <= param_idx {
+                        node.parameters.push(GlicolPara::Number(0.0));
+                    }
+                    node.parameters[param_idx] = glicol_param;
+                    self.error = None;
+                }
+            }
+
+            Action::GraphStartEditing => {
+                self.editing = true;
+            }
+
+            Action::GraphStopEditing => {
+                self.editing = false;
+            }
+
+            Action::GraphShowError(error) => {
+                self.error = Some(error);
+            }
+
+            Action::GraphClearError => {
+                self.error = None;
+            }
+
+            _ => return Ok(None),
+        }
+
+        Ok(None)
     }
 
     pub fn get_ast(&self) -> HashMap<String, (Vec<String>, Vec<Vec<GlicolPara>>)> {
@@ -70,6 +210,7 @@ impl Component for GraphComponent {
                 Constraint::Length(3),    // Categories
                 Constraint::Min(0),       // Main content
                 Constraint::Length(10),   // Node details/parameters
+                Constraint::Length(1),    // Error display
             ])
             .split(area);
 
@@ -77,6 +218,7 @@ impl Component for GraphComponent {
         self.draw_categories(f, layout[1]);
         self.draw_nodes(f, layout[2]);
         self.draw_node_details(f, layout[3]);
+        self.draw_error(f, layout[4]);
 
         Ok(())
     }
@@ -188,12 +330,30 @@ impl GraphComponent {
                             "[not set]".to_string()
                         };
 
+                        let (prefix, style) = if self.editing && 
+                            self.selected_param.map(|(id, idx)| id == *node_id && idx == i).unwrap_or(false) {
+                            (">", Style::default().fg(Color::Yellow).add_modifier(Modifier::BOLD))
+                        } else {
+                            (" ", Style::default().fg(Color::Green))
+                        };
+
                         let param_line = Line::from(vec![
-                            Span::raw(format!("  {}: ", param.name)),
-                            Span::styled(value, Style::default().fg(Color::Green)),
+                            Span::raw(format!("{}  {}: ", prefix, param.name)),
+                            Span::styled(value, style),
                             Span::raw(format!(" ({})", param.parameter_type)),
                         ]);
                         text.extend(Text::from(param_line));
+                    }
+
+                    if self.editing {
+                        text.extend(Text::from(""));
+                        text.extend(Text::from(Line::from(vec![
+                            Span::styled("Press ", Style::default().fg(Color::DarkGray)),
+                            Span::styled("Enter", Style::default().fg(Color::White)),
+                            Span::styled(" to edit parameter, ", Style::default().fg(Color::DarkGray)),
+                            Span::styled("Esc", Style::default().fg(Color::White)),
+                            Span::styled(" to cancel", Style::default().fg(Color::DarkGray)),
+                        ])));
                     }
 
                     text
@@ -212,6 +372,19 @@ impl GraphComponent {
             .wrap(ratatui::widgets::Wrap { trim: true });
 
         f.render_widget(paragraph, area);
+    }
+
+    fn draw_error(&self, f: &mut Frame<'_>, area: Rect) {
+        if let Some(error) = &self.error {
+            let text = Line::from(vec![
+                Span::styled("Error: ", Style::default().fg(Color::Red)),
+                Span::styled(error, Style::default().fg(Color::Red)),
+            ]);
+            let paragraph = Paragraph::new(text)
+                .style(Style::default())
+                .wrap(ratatui::widgets::Wrap { trim: true });
+            f.render_widget(paragraph, area);
+        }
     }
                                 .collect::<Vec<_>>()
                                 .join(", ")

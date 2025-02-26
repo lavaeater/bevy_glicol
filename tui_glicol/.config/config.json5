@@ -8,7 +8,28 @@
       "<p>": "PlayAudio", // Start playing audio
       "<t>": "SpecialAudio", // SPECIAL
       "<s>": "StopAudio", // Stop playing audio
-      "<u>": { "UpdateAudioCode": "out: saw 440.0 >> mul 0.1" } // Update audio code (example)
+      "<u>": { "UpdateAudioCode": "out: saw 440.0 >> mul 0.1" }, // Update audio code (example)
+      "<g>": "Graph" // Switch to graph mode
+    },
+    "Graph": {
+      "<q>": "Quit",
+      "<Esc>": "Home", // Return to home mode
+      "<j>": "GraphNextNode", // Select next node
+      "<k>": "GraphPrevNode", // Select previous node
+      "<l>": "GraphNextCategory", // Next category
+      "<h>": "GraphPrevCategory", // Previous category
+      "<d>": "GraphRemoveNode", // Delete selected node
+      "<Enter>": "GraphStartEditing", // Start editing mode
+      "<n>": { "GraphAddNode": "sin" }, // Add sine oscillator (example)
+      "<Space>": "GraphClearError" // Clear any error messages
+    },
+    "GraphEditing": {
+      "<Esc>": "GraphStopEditing", // Cancel editing
+      "<j>": "GraphNextNode", // Select next node
+      "<k>": "GraphPrevNode", // Select previous node
+      "<Tab>": "GraphNextParam", // Select next parameter
+      "<Shift-Tab>": "GraphPrevParam", // Select previous parameter
+      "<Enter>": { "GraphEditParam": ["node_id", 0, "440.0"] } // Example parameter edit
     }
   }
 }
