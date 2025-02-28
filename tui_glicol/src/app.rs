@@ -26,7 +26,7 @@ use crate::{
 };
 
 const SPECIAL: &str = include_str!("../assets/glicols/SolsticeStream2023.glicol");
-// const SPECIAL: &str = include_str!("../assets/glicols/synth.txt");
+//const SPECIAL: &str = include_str!("../assets/glicols/synth.glicol");
 const SAMPLES: &str = include_str!("../.config/sample-list.json");
 const BLOCK_SIZE: usize = 128;
 
