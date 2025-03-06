@@ -16,8 +16,8 @@ mod tui;
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    crate::errors::init()?;
-    crate::logging::init()?;
+    errors::init()?;
+    logging::init()?;
 
     let args = Cli::parse();
     let mut app = App::new(args.frame_rate)?;

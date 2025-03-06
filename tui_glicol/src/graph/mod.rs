@@ -122,7 +122,7 @@ impl Graph {
 
             // Add parameters
             if !node.parameters.is_empty() {
-                let params: Vec<GlicolPara> = node.parameters.iter().cloned().collect();
+                let params: Vec<GlicolPara> = node.parameters.to_vec();
                 node_params.push(params);
             }
 
