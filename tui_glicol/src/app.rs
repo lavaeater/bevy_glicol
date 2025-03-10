@@ -290,13 +290,14 @@ impl App {
                 Action::UpdateAudioCode(code) => {
                     if let Ok(mut engine) = self.engine.lock() {
                         engine.update_with_code(&code);
+                        self.log_display.add_info(format!("Code updated: {}", code));
                         // self.graph_component.update_ast(&engine.new_ast);
                     }
                 }
                 Action::SpecialAudio => {
                     if let Ok(mut engine) = self.engine.lock() {
                         engine.update_with_code(SPECIAL);
-                        // self.graph_component.update_ast(&engine.new_ast);
+                        self.log_display.add_info("Special audio code loaded");
                         self.graph_component.update_bpm((*engine).get_bpm());
                     }
                 }
