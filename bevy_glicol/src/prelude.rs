@@ -16,6 +16,12 @@ pub struct GlicolEngine {
     pub engine: Arc<Mutex<glicol::Engine<BLOCK_SIZE>>>,
 }
 
+impl Default for GlicolEngine {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl GlicolEngine {
     pub fn new() -> Self {
         let engine = Arc::new(Mutex::new(glicol::Engine::<BLOCK_SIZE>::new()));
@@ -38,7 +44,7 @@ impl GlicolEngine {
 
     pub fn update_with_code(&self, code: &str) {
         let mut engine = self.engine.lock();
-        engine.update_with_code(code);
+        let _ = engine.update_with_code(code);
     }
 }
 
@@ -94,7 +100,7 @@ where
             prev_block_pos = BLOCK_SIZE;
             while writes < block_step {
                 let mut e = engine_clone.lock();
-                let (block) = e.next_block(vec![]);
+                let block = e.next_block(vec![]);
 
                 if writes + BLOCK_SIZE <= block_step {
                     for i in 0..BLOCK_SIZE {
