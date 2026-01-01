@@ -6,7 +6,6 @@ description = "A Ratatui UI for Glicol"
 authors = ["Tommie Nygren <tommie.nygren@gmail.com>"]
 build = "build.rs"
 
-
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
