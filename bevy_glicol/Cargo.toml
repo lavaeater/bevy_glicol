@@ -3,13 +3,40 @@ name = "bevy_glicol"
 version = "0.1.0"
 edition = "2024"
 
+#Execution failed (exit code 101).
+#/home/tommie/.cargo/bin/cargo metadata --verbose --format-version 1 --all-features --filter-platform x86_64-unknown-linux-gnu
+#    in working directory: /home/tommie/projects/paused/games/bevy_glicol
+#    with extra environment variables: TERM=ansi CARGO_TERM_PROGRESS_WHEN=always RUST_BACKTRACE=short RUSTC=/home/tommie/.cargo/bin/rustc CARGO_TERM_PROGRESS_WIDTH=80
+#stdout:     Updating crates.io index
+#       Fetch [===========>                     ] 116 complete; 0 pending      
+#       Fetch [==============>                  ] 116 complete; 220 pending    
+#       Fetch [==============>                  ] 330 complete; 6 pending      
+#       Fetch [==============>                  ] 331 complete; 5 pending      
+#       Fetch [=================>               ] 336 complete; 228 pending    
+#       Fetch [=================>               ] 561 complete; 3 pending      
+#error: failed to select a version for `cpal`.
+#    ... required by package `bevy_audio v0.18.0`
+#    ... which satisfies dependency `bevy_audio = "^0.18.0"` of package `bevy_internal v0.18.0`
+#    ... which satisfies dependency `bevy_internal = "^0.18.0"` of package `bevy v0.18.1`
+#    ... which satisfies dependency `bevy = "^0.18.1"` of package `bevy_glicol v0.1.0 (/home/tommie/projects/paused/games/bevy_glicol/bevy_glicol)`
+#versions that meet the requirements `^0.15` are: 0.15.3, 0.15.2, 0.15.1, 0.15.0
+#
+#package `bevy_audio` depends on `cpal` with feature `oboe-shared-stdcxx` but `cpal` does not have that feature.
+# available features: asio, asio-sys, jack, num-traits, wasm-bindgen
+#
+#
+#failed to select a version for `cpal` which could resolve this conflict
+#
+#stderr: 
+
 [dependencies]
 anyhow = "1.0.82"
-bevy = "0.18.1"
-cpal = "0.17.3"
+bevy = { version = "0.18.1", default-features = false, features = ["bevy_audio"] }
+cpal = "0.15.3"
 glicol = { git="https://github.com/lavaeater/glicol", branch = "main" }
 glicol_synth = { git = "https://github.com/lavaeater/glicol", branch = "main" }
 parking_lot = "0.12.2"
+log = "0.4.29"
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]
 wasm-bindgen = "0.2.92"

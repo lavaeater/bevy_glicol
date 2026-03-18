@@ -8,6 +8,7 @@ use std::{
     },
     thread,
 };
+use log::{error, info};
 
 const BLOCK_SIZE: usize = 128;
 
