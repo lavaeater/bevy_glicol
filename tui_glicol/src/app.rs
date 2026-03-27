@@ -52,6 +52,7 @@ pub enum Mode {
     Home,
     Graph,
     GraphEditing,
+    GraphParamInput,
 }
 
 impl App {
@@ -209,13 +210,32 @@ impl App {
                     action_tx.send(action)?;
                 }
             }
-            Mode::Graph | Mode::GraphEditing => {}
+            Mode::Graph | Mode::GraphEditing | Mode::GraphParamInput => {}
         }
         Ok(())
     }
 
     fn handle_key_event(&mut self, key: KeyEvent) -> Result<()> {
+        use crossterm::event::{KeyCode, KeyModifiers};
         let action_tx = self.action_tx.clone();
+
+        // Raw character capture for param input mode — bypass keymap entirely
+        if self.mode == Mode::GraphParamInput {
+            match key.code {
+                KeyCode::Char(c)
+                    if key.modifiers.is_empty()
+                        || key.modifiers == KeyModifiers::SHIFT =>
+                {
+                    action_tx.send(Action::GraphInputChar(c))?;
+                }
+                KeyCode::Backspace => action_tx.send(Action::GraphInputBackspace)?,
+                KeyCode::Enter => action_tx.send(Action::GraphConfirmParam)?,
+                KeyCode::Esc => action_tx.send(Action::GraphCancelParam)?,
+                _ => {}
+            }
+            return Ok(());
+        }
+
         let Some(keymap) = self.config.keybindings.get(&self.mode) else {
             return Ok(());
         };
@@ -266,7 +286,9 @@ impl App {
                 Action::GraphNextNode
                 | Action::GraphPrevNode
                 | Action::GraphNextCategory
-                | Action::GraphPrevCategory => {
+                | Action::GraphPrevCategory
+                | Action::GraphNextParam
+                | Action::GraphPrevParam => {
                     if let Ok(Some(new_action)) = self.graph_component.handle_action(action_clone) {
                         action_tx.send(new_action)?;
                     }
@@ -288,6 +310,36 @@ impl App {
                 }
                 Action::GraphStopEditing => {
                     self.mode = Mode::Graph;
+                    if let Ok(Some(new_action)) = self.graph_component.handle_action(action_clone) {
+                        action_tx.send(new_action)?;
+                    }
+                }
+                Action::GraphStartParamInput => {
+                    match self.graph_component.handle_action(action_clone) {
+                        Ok(None) => {
+                            self.mode = Mode::GraphParamInput;
+                        }
+                        Ok(Some(new_action)) => {
+                            action_tx.send(new_action)?;
+                        }
+                        Err(e) => {
+                            self.log_display.add_error(format!("Param input: {}", e));
+                        }
+                    }
+                }
+                Action::GraphInputChar(_) | Action::GraphInputBackspace => {
+                    if let Ok(Some(new_action)) = self.graph_component.handle_action(action_clone) {
+                        action_tx.send(new_action)?;
+                    }
+                }
+                Action::GraphConfirmParam => {
+                    self.mode = Mode::GraphEditing;
+                    if let Ok(Some(new_action)) = self.graph_component.handle_action(action_clone) {
+                        action_tx.send(new_action)?; // sends GraphEditParam(...)
+                    }
+                }
+                Action::GraphCancelParam => {
+                    self.mode = Mode::GraphEditing;
                     if let Ok(Some(new_action)) = self.graph_component.handle_action(action_clone) {
                         action_tx.send(new_action)?;
                     }
@@ -324,7 +376,7 @@ impl App {
                         self.action_tx.send(new_action)?;
                     }
                 }
-                Mode::Graph | Mode::GraphEditing => {}
+                Mode::Graph | Mode::GraphEditing | Mode::GraphParamInput => {}
             }
         }
         Ok(())
@@ -350,7 +402,7 @@ impl App {
                         let _ = self.action_tx.send(Action::Error(err_msg));
                     }
                 }
-                Mode::Graph | Mode::GraphEditing => {
+                Mode::Graph | Mode::GraphEditing | Mode::GraphParamInput => {
                     if let Err(err) = self.graph_component.draw(frame, main_area) {
                         let err_msg = format!("Failed to draw graph: {:?}", err);
                         self.log_display.add_error(err_msg.clone());

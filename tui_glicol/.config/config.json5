@@ -29,7 +29,7 @@
       "<k>": "GraphPrevNode", // Select previous node
       "<Tab>": "GraphNextParam", // Select next parameter
       "<Shift-Tab>": "GraphPrevParam", // Select previous parameter
-      "<Enter>": { "GraphEditParam": ["node_id", 0, "440.0"] } // Example parameter edit
+      "<Enter>": "GraphStartParamInput" // Start typing a new value for the selected parameter
     }
   }
 }

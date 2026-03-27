@@ -1,8 +1,10 @@
 # TUI Glicol
 
 ## My Notes
-Phase 2 complete — Graph::to_glicol_code() implemented with chain flattening, wired into the engine.
-"TUI Glicol project status — Phase 2 complete, ready for Phase 3"
+Phase 3 complete — live parameter text input implemented.
+- New `GraphParamInput` mode; Tab/Shift-Tab to select param, Enter to edit, type value, Enter to confirm, Esc to cancel.
+- Input buffer pre-fills with current param value and shows a `|` cursor while typing.
+- GraphNextParam/GraphPrevParam actions now properly wired in app.rs.
 
 A terminal user interface for the [Glicol](https://glicol.org/) music engine, built in Rust with `ratatui` and `cpal`.
 

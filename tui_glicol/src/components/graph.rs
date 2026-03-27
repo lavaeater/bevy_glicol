@@ -22,6 +22,8 @@ pub struct GraphComponent {
     selected_param: Option<(String, usize)>, // (node_id, param_index)
     selected_category: Option<usize>,
     editing: bool,
+    input_buffer: String,
+    param_input_active: bool,
     bpm: f32,
     error: Option<String>,
 }
@@ -34,6 +36,8 @@ impl GraphComponent {
             selected_param: None,
             selected_category: None,
             editing: false,
+            input_buffer: String::new(),
+            param_input_active: false,
             bpm: 120.0,
             error: None,
         }
@@ -240,6 +244,51 @@ impl GraphComponent {
                 None
             },
 
+            Action::GraphStartParamInput => {
+                if !self.editing || self.selected_param.is_none() {
+                    return Ok(Some(Action::GraphShowError(
+                        "Select a parameter first (Tab/Shift-Tab)".to_string(),
+                    )));
+                }
+                self.input_buffer = self.current_param_value_str();
+                self.param_input_active = true;
+                None
+            }
+
+            Action::GraphInputChar(c) => {
+                if self.param_input_active {
+                    self.input_buffer.push(c);
+                }
+                None
+            }
+
+            Action::GraphInputBackspace => {
+                if self.param_input_active {
+                    self.input_buffer.pop();
+                }
+                None
+            }
+
+            Action::GraphConfirmParam => {
+                if self.param_input_active {
+                    if let Some((node_id, param_idx)) = self.selected_param.clone() {
+                        let value = self.input_buffer.clone();
+                        self.input_buffer.clear();
+                        self.param_input_active = false;
+                        return Ok(Some(Action::GraphEditParam(node_id, param_idx, value)));
+                    }
+                }
+                self.param_input_active = false;
+                self.input_buffer.clear();
+                None
+            }
+
+            Action::GraphCancelParam => {
+                self.input_buffer.clear();
+                self.param_input_active = false;
+                None
+            }
+
             Action::GraphShowError(error) => {
                 self.error = Some(error);
                 None
@@ -253,6 +302,27 @@ impl GraphComponent {
             _ => None,
         };
         Ok(result)
+    }
+
+    fn current_param_value_str(&self) -> String {
+        let Some((node_id, param_idx)) = &self.selected_param else {
+            return String::new();
+        };
+        let Some(node) = self.graph.nodes().get(node_id) else {
+            return String::new();
+        };
+        match node.parameters.get(*param_idx) {
+            Some(GlicolPara::Number(n)) => {
+                if n.fract() == 0.0 && n.abs() < 1e9 {
+                    format!("{}", *n as i64)
+                } else {
+                    format!("{}", n)
+                }
+            }
+            Some(GlicolPara::Reference(r)) => r.clone(),
+            Some(GlicolPara::SampleSymbol(s)) => s.clone(),
+            _ => String::new(),
+        }
     }
 
     pub fn get_ast(&self) -> HashMap<String, (Vec<String>, Vec<Vec<GlicolPara>>)> {
@@ -419,32 +489,38 @@ impl GraphComponent {
                     ]);
 
                     for (i, param) in definition.parameters.iter().enumerate() {
-                        let value = if i < node.parameters.len() {
-                            node.parameters[i].to_string()
-                        } else {
-                            "[not set]".to_string()
-                        };
-
-                        let (prefix, style) = if self.editing
+                        let is_selected = self.editing
                             && self
                                 .selected_param
                                 .as_ref()
                                 .map(|(id, idx)| id == node_id && *idx == i)
-                                .unwrap_or(false)
-                        {
-                            (
-                                ">",
-                                Style::default()
-                                    .fg(Color::Yellow)
-                                    .add_modifier(Modifier::BOLD),
-                            )
+                                .unwrap_or(false);
+                        let is_typing = is_selected && self.param_input_active;
+
+                        let (prefix, label_style) = if is_selected {
+                            (">", Style::default().fg(Color::Yellow).add_modifier(Modifier::BOLD))
                         } else {
                             (" ", Style::default().fg(Color::Green))
                         };
 
+                        let value_span = if is_typing {
+                            // Show input buffer with blinking cursor
+                            Span::styled(
+                                format!("{}|", self.input_buffer),
+                                Style::default().fg(Color::White).add_modifier(Modifier::BOLD),
+                            )
+                        } else {
+                            let value = if i < node.parameters.len() {
+                                node.parameters[i].to_string()
+                            } else {
+                                "[not set]".to_string()
+                            };
+                            Span::styled(value, label_style)
+                        };
+
                         let param_line = Line::from(vec![
                             Span::raw(format!("{}  {}: ", prefix, param.name)),
-                            Span::styled(value, style),
+                            value_span,
                             Span::raw(format!(" ({})", param.parameter_type)),
                         ]);
                         text.extend(Text::from(param_line));
@@ -452,16 +528,27 @@ impl GraphComponent {
 
                     if self.editing {
                         text.extend(Text::from(""));
-                        text.extend(Text::from(Line::from(vec![
-                            Span::styled("Press ", Style::default().fg(Color::DarkGray)),
-                            Span::styled("Enter", Style::default().fg(Color::White)),
-                            Span::styled(
-                                " to edit parameter, ",
-                                Style::default().fg(Color::DarkGray),
-                            ),
-                            Span::styled("Esc", Style::default().fg(Color::White)),
-                            Span::styled(" to cancel", Style::default().fg(Color::DarkGray)),
-                        ])));
+                        if self.param_input_active {
+                            text.extend(Text::from(Line::from(vec![
+                                Span::styled("Type value, ", Style::default().fg(Color::DarkGray)),
+                                Span::styled("Enter", Style::default().fg(Color::White)),
+                                Span::styled(" to confirm, ", Style::default().fg(Color::DarkGray)),
+                                Span::styled("Esc", Style::default().fg(Color::White)),
+                                Span::styled(" to cancel", Style::default().fg(Color::DarkGray)),
+                            ])));
+                        } else {
+                            text.extend(Text::from(Line::from(vec![
+                                Span::styled("Tab", Style::default().fg(Color::White)),
+                                Span::styled(
+                                    " to select param, ",
+                                    Style::default().fg(Color::DarkGray),
+                                ),
+                                Span::styled("Enter", Style::default().fg(Color::White)),
+                                Span::styled(" to edit, ", Style::default().fg(Color::DarkGray)),
+                                Span::styled("Esc", Style::default().fg(Color::White)),
+                                Span::styled(" to stop editing", Style::default().fg(Color::DarkGray)),
+                            ])));
+                        }
                     }
 
                     text
