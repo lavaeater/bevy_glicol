@@ -259,6 +259,10 @@ impl GraphComponent {
         self.graph.to_glicol_ast()
     }
 
+    pub fn get_glicol_code(&self) -> String {
+        self.graph.to_glicol_code()
+    }
+
     pub fn update_bpm(&mut self, bpm: f32) {
         self.bpm = bpm;
     }

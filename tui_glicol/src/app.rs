@@ -100,20 +100,27 @@ impl App {
         }
         engine.set_bpm(120.0);
 
-        engine.update_with_code(
-            r#"o: sin 440 >> mul ~mod;
-~mod: sin 1.2 >> mul 0.3 >> add 0.5;"#,
-        );
         let engine = Arc::new(Mutex::new(engine));
 
         let mut graph_component = GraphComponent::new();
 
-        // Seed the graph with a simple default patch matching the engine startup code
+        // Seed the graph with a simple default patch
         if let Ok(sin_id) = graph_component.add_node("sin", (0.0, 0.0)) {
             let _ = graph_component.handle_action(Action::GraphEditParam(sin_id.clone(), 0, "440".to_string()));
             if let Ok(mul_id) = graph_component.add_node("mul", (1.0, 0.0)) {
                 let _ = graph_component.handle_action(Action::GraphEditParam(mul_id.clone(), 0, "0.3".to_string()));
                 let _ = graph_component.connect_nodes(&sin_id, &mul_id);
+            }
+        }
+
+        // Initialize engine from graph (keeps graph and engine in sync from the start)
+        {
+            let code = graph_component.get_glicol_code();
+            let mut eng = engine.lock().unwrap();
+            if !code.is_empty() {
+                eng.update_with_code(&code);
+            } else {
+                eng.update_with_code("o: sin 440");
             }
         }
         let host = cpal::default_host();
@@ -259,14 +266,19 @@ impl App {
                 Action::GraphNextNode
                 | Action::GraphPrevNode
                 | Action::GraphNextCategory
-                | Action::GraphPrevCategory
-                | Action::GraphAddNode(_)
+                | Action::GraphPrevCategory => {
+                    if let Ok(Some(new_action)) = self.graph_component.handle_action(action_clone) {
+                        action_tx.send(new_action)?;
+                    }
+                }
+                Action::GraphAddNode(_)
                 | Action::GraphRemoveNode
                 | Action::GraphConnectNodes(_, _)
                 | Action::GraphEditParam(_, _, _) => {
                     if let Ok(Some(new_action)) = self.graph_component.handle_action(action_clone) {
                         action_tx.send(new_action)?;
                     }
+                    self.sync_graph_to_engine();
                 }
                 Action::GraphStartEditing => {
                     self.mode = Mode::GraphEditing;
@@ -354,6 +366,18 @@ impl App {
             }
         })?;
         Ok(())
+    }
+
+    fn sync_graph_to_engine(&mut self) {
+        let code = self.graph_component.get_glicol_code();
+        if code.is_empty() {
+            return;
+        }
+        if let Ok(mut engine) = self.engine.lock() {
+            engine.update_with_code(&code);
+            self.log_display
+                .add_info(format!("Graph synced: {}", code.replace('\n', " | ")));
+        }
     }
 
     fn setup_audio(&mut self) -> Result<()> {
