@@ -1,8 +1,8 @@
 # TUI Glicol
 
 ## My Notes
-Phase 2 — Graph::to_glicol_code() and wiring it into the engine.
-"TUI Glicol project status — Phase 1 complete, ready for Phase 2"
+Phase 2 complete — Graph::to_glicol_code() implemented with chain flattening, wired into the engine.
+"TUI Glicol project status — Phase 2 complete, ready for Phase 3"
 
 A terminal user interface for the [Glicol](https://glicol.org/) music engine, built in Rust with `ratatui` and `cpal`.
 
@@ -17,7 +17,8 @@ Glicol uses a node-based DSL to connect oscillators, samples, beats, effects, an
 - **Keybinding config**: JSON5-based keybinding system with mode-aware dispatch (`Home`, `Graph`, `GraphEditing`)
 - **Actions**: `PlayAudio`, `StopAudio`, `UpdateAudioCode(code)`, `SpecialAudio` (loads `SolsticeStream2023.glicol`)
 - **Mode switching**: `SwitchMode(Graph)` action exists and sets `App.mode`, but the graph view is not conditionally rendered yet
-- **Graph data model**: `Graph` struct with `Node`, `NodeRegistry`, `NodeTypeDefinition` — supports add/remove/connect nodes, parameter validation, and AST export via `to_glicol_ast()`
+- **Graph data model**: `Graph` struct with `Node`, `NodeRegistry`, `NodeTypeDefinition` — supports add/remove/connect nodes, parameter validation, AST export via `to_glicol_ast()`, and Glicol DSL export via `to_glicol_code()`
+- **Graph-Engine sync**: `Graph::to_glicol_code()` serializes the node graph into Glicol DSL with chain flattening (e.g. `sin 440 >> mul 0.3`). Graph-modifying actions (`GraphAddNode`, `GraphRemoveNode`, `GraphConnectNodes`, `GraphEditParam`) automatically regenerate code and call `engine.update_with_code()`. Engine is initialized from graph on startup.
 - **Graph component UI**: Category tabs, node list, node detail panel with parameter display, error bar — all render correctly when nodes exist
 - **Graph actions**: Navigation (`j`/`k`), category browsing (`h`/`l`), add/remove nodes, start/stop editing, param navigation (`Tab`/`Shift-Tab`)
 - **Log display**: Bottom panel showing recent info/error messages
@@ -25,8 +26,7 @@ Glicol uses a node-based DSL to connect oscillators, samples, beats, effects, an
 ### What doesn't work yet
 
 - **Mode-conditional rendering**: Pressing `<g>` switches internal mode to `Graph` but `render()` always draws all components + `GraphComponent` (drawn twice — once via `self.components` and once directly). Home view has no way to hide when in Graph mode and vice versa.
-- **Graph-Engine sync**: `graph_component.update_ast(&engine.new_ast)` is commented out. The graph is always empty on start. No path to populate graph from running engine state or to push graph changes back into the engine.
-- **Live editing loop**: No mechanism to take a graph edit, regenerate Glicol code, and call `engine.update_with_code()` in real time.
+- **Reverse sync (engine→graph)**: No path to populate graph from an externally loaded `.glicol` file or `SpecialAudio` code.
 - **File I/O**: No save/load for `.glicol` files or any proprietary graph format.
 - **Text input for params**: `GraphEditParam` keybinding is hardcoded to example values; no actual text input widget for typing parameter values.
 
@@ -38,11 +38,11 @@ Glicol uses a node-based DSL to connect oscillators, samples, beats, effects, an
 2. Verify mode switching works end-to-end (`<g>` to Graph, `<Esc>` to Home)
 3. Seed the graph with a simple default patch on startup so there's something to see in Graph mode
 
-### Phase 2 — Graph-Engine round-trip
+### Phase 2 — Graph-Engine round-trip ✅
 
-4. Implement `Graph::to_glicol_code()` — serialize the node graph back into Glicol DSL text (the `.glicol` format)
-5. Wire up: graph edit -> `to_glicol_code()` -> `engine.update_with_code()` so edits are heard immediately
-6. Optionally populate `GraphComponent` from the engine's AST on startup (parse existing code into nodes)
+4. ~~Implement `Graph::to_glicol_code()` — serialize the node graph back into Glicol DSL text~~ ✅
+5. ~~Wire up: graph edit -> `to_glicol_code()` -> `engine.update_with_code()` so edits are heard immediately~~ ✅
+6. ~~Engine initialized from graph-generated code on startup (graph and engine always in sync)~~ ✅
 
 ### Phase 3 — Parameter editing
 
@@ -72,7 +72,7 @@ app.rs               -> App struct: owns Engine, components, action loop, audio 
 tui.rs               -> Terminal setup, event loop (crossterm + tokio)
 action.rs            -> Action enum (all user/system actions)
 config.rs            -> JSON5 config + keybinding parsing
-graph/mod.rs         -> Graph, Node (data model, AST export)
+graph/mod.rs         -> Graph, Node (data model, AST export, to_glicol_code())
 graph/node_types.rs  -> NodeRegistry, NodeTypeDefinition, ParameterType
 components/
   mod.rs             -> Component trait
