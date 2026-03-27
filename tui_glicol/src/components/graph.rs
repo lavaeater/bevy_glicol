@@ -179,6 +179,10 @@ impl GraphComponent {
 
             Action::GraphStartEditing => {
                 self.editing = true;
+                // Auto-select param 0 so the cursor is visible immediately
+                if let Some(node_id) = self.selected_node_id.clone() {
+                    self.selected_param = Some((node_id, 0));
+                }
                 None
             },
 
@@ -199,15 +203,10 @@ impl GraphComponent {
                             .get_definition(&node.node_type)
                             .ok_or_else(|| format!("Unknown node type: {}", node.node_type))?;
 
-                        let current_idx = self.selected_param
-                            .as_ref()
-                            .map(|(_, idx)| *idx)
-                            .unwrap_or(0);
-                        
-                        let next_idx = if current_idx + 1 >= definition.parameters.len() {
-                            0
-                        } else {
-                            current_idx + 1
+                        let next_idx = match self.selected_param.as_ref().map(|(_, i)| *i) {
+                            None => 0,
+                            Some(i) if i + 1 >= definition.parameters.len() => 0,
+                            Some(i) => i + 1,
                         };
 
                         self.selected_param = Some((node_id.clone(), next_idx));
@@ -227,15 +226,9 @@ impl GraphComponent {
                             .get_definition(&node.node_type)
                             .ok_or_else(|| format!("Unknown node type: {}", node.node_type))?;
 
-                        let current_idx = self.selected_param
-                            .as_ref()
-                            .map(|(_, idx)| *idx)
-                            .unwrap_or(0);
-                        
-                        let prev_idx = if current_idx == 0 {
-                            definition.parameters.len().saturating_sub(1)
-                        } else {
-                            current_idx - 1
+                        let prev_idx = match self.selected_param.as_ref().map(|(_, i)| *i) {
+                            None | Some(0) => definition.parameters.len().saturating_sub(1),
+                            Some(i) => i - 1,
                         };
 
                         self.selected_param = Some((node_id.clone(), prev_idx));
@@ -379,14 +372,38 @@ impl Component for GraphComponent {
 }
 
 impl GraphComponent {
+    fn visual_mode(&self) -> (&'static str, Color) {
+        if self.param_input_active {
+            ("TYPING", Color::Green)
+        } else if self.editing {
+            ("EDITING", Color::Yellow)
+        } else {
+            ("NAVIGATE", Color::Cyan)
+        }
+    }
+
     fn draw_title(&self, f: &mut Frame<'_>, area: Rect) {
+        let (mode_label, mode_color) = self.visual_mode();
         let title_block = Block::default()
             .borders(Borders::ALL)
-            .style(Style::default().fg(Color::Cyan));
+            .border_style(Style::default().fg(mode_color));
 
-        let title = format!("Glicol Graph (BPM: {})", self.bpm);
-        let title = Paragraph::new(title).block(title_block);
-        f.render_widget(title, area);
+        let title = Line::from(vec![
+            Span::raw(" Glicol Graph  "),
+            Span::styled(
+                format!(" {} ", mode_label),
+                Style::default()
+                    .fg(Color::Black)
+                    .bg(mode_color)
+                    .add_modifier(Modifier::BOLD),
+            ),
+            Span::styled(
+                format!("  BPM: {}", self.bpm),
+                Style::default().fg(Color::White),
+            ),
+        ]);
+        let paragraph = Paragraph::new(title).block(title_block);
+        f.render_widget(paragraph, area);
     }
 
     fn draw_categories(&self, f: &mut Frame<'_>, area: Rect) {
@@ -410,60 +427,93 @@ impl GraphComponent {
     }
 
     fn draw_nodes(&self, f: &mut Frame<'_>, area: Rect) {
+        let (_, mode_color) = self.visual_mode();
         let block = Block::default()
             .borders(Borders::ALL)
-            .title("Nodes")
-            .style(Style::default());
+            .title("Nodes  [j/k to move]")
+            .border_style(Style::default().fg(mode_color));
 
-        let items: Vec<ListItem> = self
-            .graph
-            .nodes()
+        // Stable sort by ID so the list order doesn't jump around
+        let mut sorted: Vec<(&String, &crate::graph::Node)> =
+            self.graph.nodes().iter().collect();
+        sorted.sort_by_key(|(id, _)| id.as_str());
+
+        // Count how many nodes of each type exist, for disambiguation labels
+        let mut type_totals: HashMap<&str, usize> = HashMap::new();
+        for (_, node) in &sorted {
+            *type_totals.entry(node.node_type.as_str()).or_default() += 1;
+        }
+        let mut type_seen: HashMap<&str, usize> = HashMap::new();
+
+        let items: Vec<ListItem> = sorted
             .iter()
             .map(|(id, node)| {
-                let mut style = Style::default();
-                // Verify the node type exists
-                self.graph
-                    .get_registry()
-                    .get_definition(&node.node_type)
-                    .unwrap_or_else(|| panic!("Unknown node type: {}", node.node_type));
+                let is_selected = Some(*id) == self.selected_node_id.as_ref();
 
-                let prefix = if Some(id) == self.selected_node_id.as_ref() {
-                    style = style.fg(Color::Yellow).add_modifier(Modifier::BOLD);
-                    ">"
+                // Build a short display label: type name, disambiguated if needed
+                let total = type_totals[node.node_type.as_str()];
+                let n = {
+                    let seen = type_seen.entry(node.node_type.as_str()).or_default();
+                    *seen += 1;
+                    *seen
+                };
+                let label = if total > 1 {
+                    format!("{} #{}", node.node_type, n)
                 } else {
-                    " "
+                    node.node_type.clone()
                 };
 
-                let inputs = if node.inputs.is_empty() {
-                    "[no inputs]".to_string()
+                // Show input connections as node types, not raw IDs
+                let input_types: Vec<String> = node
+                    .inputs
+                    .iter()
+                    .map(|input_id| {
+                        self.graph
+                            .nodes()
+                            .get(input_id)
+                            .map(|n| n.node_type.clone())
+                            .unwrap_or_else(|| "?".to_string())
+                    })
+                    .collect();
+                let inputs_str = if input_types.is_empty() {
+                    String::new()
                 } else {
-                    format!("[{}]", node.inputs.join(", "))
+                    format!("  ← {}", input_types.join(", "))
                 };
 
-                let content = Line::from(vec![
-                    Span::styled(format!("{} {}", prefix, id), style),
-                    Span::raw(" ("),
-                    Span::styled(&node.node_type, style.fg(Color::Cyan)),
-                    Span::raw(") "),
-                    Span::styled(inputs, Style::default().fg(Color::DarkGray)),
-                ]);
-
-                ListItem::new(content)
+                let line = if is_selected {
+                    Line::from(Span::styled(
+                        format!("  ► {}{}", label, inputs_str),
+                        Style::default()
+                            .fg(Color::Black)
+                            .bg(Color::Yellow)
+                            .add_modifier(Modifier::BOLD),
+                    ))
+                } else {
+                    Line::from(vec![
+                        Span::raw(format!("    {}", label)),
+                        Span::styled(inputs_str, Style::default().fg(Color::DarkGray)),
+                    ])
+                };
+                ListItem::new(line)
             })
             .collect();
 
-        let list = List::new(items)
-            .block(block)
-            .highlight_style(Style::default().add_modifier(Modifier::BOLD));
-
+        let list = List::new(items).block(block);
         f.render_widget(list, area);
     }
 
     fn draw_node_details(&self, f: &mut Frame<'_>, area: Rect) {
+        let (mode_label, mode_color) = self.visual_mode();
+        let details_title = if self.editing {
+            format!("Node Details  [ {} ]", mode_label)
+        } else {
+            "Node Details  [ Enter to edit ]".to_string()
+        };
         let block = Block::default()
             .borders(Borders::ALL)
-            .title("Node Details")
-            .style(Style::default());
+            .title(details_title)
+            .border_style(Style::default().fg(mode_color));
 
         let content = if let Some(node_id) = &self.selected_node_id {
             if let Some(node) = self.graph.nodes().get(node_id) {
