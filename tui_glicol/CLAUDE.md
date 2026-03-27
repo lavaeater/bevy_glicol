@@ -31,34 +31,33 @@ src/
 
 ## Current Status
 
-**Phase 2 complete.** Graph-Engine round-trip is working.
+**Phase 3 complete.** Live parameter text input implemented.
 
 ### What works
 - Audio engine: Glicol + cpal, plays on startup
 - Sample loading from `.config/sample-list.json`
-- Keybinding config: JSON5, mode-aware (`Home`, `Graph`, `GraphEditing`)
+- Keybinding config: JSON5, mode-aware (`Home`, `Graph`, `GraphEditing`, `GraphParamInput`)
 - Actions: `PlayAudio`, `StopAudio`, `UpdateAudioCode`, `SpecialAudio`, `SwitchMode`
 - Graph data model: `Graph`, `Node`, `NodeRegistry`, `NodeTypeDefinition` — add/remove/connect, param validation, `to_glicol_ast()`, `to_glicol_code()`
 - Graph-Engine sync: graph edits regenerate code and call engine
 - Graph component UI: category tabs, node list, node detail panel, error bar
 - Graph actions: `j`/`k` navigation, `h`/`l` category browsing, add/remove nodes, param nav (`Tab`/`Shift-Tab`)
+- **Parameter text input**: `Tab` to select param → `Enter` to edit → type value → `Enter` to confirm / `Esc` to cancel. Buffer pre-fills with current value, shows `|` cursor. Supports `Number` and `Reference` param types.
 - Log display at bottom
 
 ### Known issues / not yet done
-- **Mode-conditional rendering broken**: `render()` always draws all components; `GraphComponent` is drawn twice (once via `self.components`, once directly). Fix: draw `Home` only in `Home` mode, `GraphComponent` only in `Graph`/`GraphEditing`.
-- **`GraphComponent` is duplicated** in both `App.components` and `App.graph_component` — needs cleanup.
-- **No text input for params**: `GraphEditParam` uses hardcoded example values; needs actual text input widget.
 - **No reverse sync**: no path from `.glicol` file → `Graph`.
 - **No file I/O**: no save/load for `.glicol` files or graph format.
+- **Pattern param type**: `ParameterType::Pattern` not yet handled in `GraphEditParam` (only `Number` and `Reference`).
 
 ## Roadmap
 
 | Phase | Status | Description |
 |-------|--------|-------------|
-| 1 | Pending | Mode-conditional rendering, fix double-draw, default seed patch |
+| 1 | ✅ Done | Mode-conditional rendering, fix double-draw, default seed patch |
 | 2 | ✅ Done | Graph→Engine round-trip (`to_glicol_code()` wired to engine) |
-| 3 | Next | Parameter editing: text input widget, all `ParameterType` variants |
-| 4 | Future | File I/O: save/load `.glicol`, optional JSON/RON graph format |
+| 3 | ✅ Done | Parameter editing: text input widget (`Number` + `Reference` types) |
+| 4 | Next | File I/O: save/load `.glicol`, optional JSON/RON graph format |
 | 5 | Future | Node connection UI, category browser, BPM control, sample management, help overlay |
 
 ## Glicol DSL Notes

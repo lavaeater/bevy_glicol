@@ -27,10 +27,8 @@ Glicol uses a node-based DSL to connect oscillators, samples, beats, effects, an
 
 ### What doesn't work yet
 
-- **Mode-conditional rendering**: Pressing `<g>` switches internal mode to `Graph` but `render()` always draws all components + `GraphComponent` (drawn twice — once via `self.components` and once directly). Home view has no way to hide when in Graph mode and vice versa.
 - **Reverse sync (engine→graph)**: No path to populate graph from an externally loaded `.glicol` file or `SpecialAudio` code.
 - **File I/O**: No save/load for `.glicol` files or any proprietary graph format.
-- **Text input for params**: `GraphEditParam` keybinding is hardcoded to example values; no actual text input widget for typing parameter values.
 
 ## Plan
 
@@ -46,11 +44,11 @@ Glicol uses a node-based DSL to connect oscillators, samples, beats, effects, an
 5. ~~Wire up: graph edit -> `to_glicol_code()` -> `engine.update_with_code()` so edits are heard immediately~~ ✅
 6. ~~Engine initialized from graph-generated code on startup (graph and engine always in sync)~~ ✅
 
-### Phase 3 — Parameter editing
+### Phase 3 — Parameter editing ✅
 
-7. Add a text input widget (inline or popup) for editing parameter values in `GraphEditing` mode
-8. Replace hardcoded `GraphEditParam` keybinding with dynamic input that writes to the selected param
-9. Support all `ParameterType` variants: `Number`, `Reference`, `Pattern`
+7. ~~Add a text input widget (inline or popup) for editing parameter values in `GraphEditing` mode~~ ✅
+8. ~~Replace hardcoded `GraphEditParam` keybinding with dynamic input that writes to the selected param~~ ✅
+9. Support `Pattern` ParameterType (currently `Number` and `Reference` are fully supported)
 
 ### Phase 4 — File I/O
 
