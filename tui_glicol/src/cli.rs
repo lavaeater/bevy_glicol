@@ -10,15 +10,6 @@ pub struct Cli {
     pub frame_rate: f64,
 }
 
-const VERSION_MESSAGE: &str = concat!(
-    env!("CARGO_PKG_VERSION"),
-    "-",
-    env!("VERGEN_GIT_DESCRIBE"),
-    " (",
-    env!("VERGEN_BUILD_DATE"),
-    ")"
-);
-
 pub fn version() -> String {
     let author = clap::crate_authors!();
 
@@ -28,8 +19,6 @@ pub fn version() -> String {
 
     format!(
         "\
-{VERSION_MESSAGE}
-
 Authors: {author}
 
 Config directory: {config_dir_path}
