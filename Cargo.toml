@@ -1,7 +1,7 @@
-cargo-features = ["codegen-backend"]
+#cargo-features = ["codegen-backend"]
 
-[profile.dev]
-codegen-backend = "cranelift"
+#[profile.dev]
+#codegen-backend = "cranelift"
 
 [workspace]
 members = ["tui_glicol",

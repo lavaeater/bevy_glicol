@@ -33,7 +33,7 @@ const BLOCK_SIZE: usize = 128;
 pub struct App {
     config: Config,
     frame_rate: f64,
-    components: Vec<Box<dyn Component>>,
+    home: Home,
     should_quit: bool,
     should_suspend: bool,
     mode: Mode,
@@ -106,12 +106,16 @@ impl App {
         );
         let engine = Arc::new(Mutex::new(engine));
 
-        let graph_component = GraphComponent::new();
+        let mut graph_component = GraphComponent::new();
 
-        // Uncomment when ready to update AST
-        // if let Ok(engine) = engine.lock() {
-        //     graph_component.update_ast(&engine.new_ast);
-        // }
+        // Seed the graph with a simple default patch matching the engine startup code
+        if let Ok(sin_id) = graph_component.add_node("sin", (0.0, 0.0)) {
+            let _ = graph_component.handle_action(Action::GraphEditParam(sin_id.clone(), 0, "440".to_string()));
+            if let Ok(mul_id) = graph_component.add_node("mul", (1.0, 0.0)) {
+                let _ = graph_component.handle_action(Action::GraphEditParam(mul_id.clone(), 0, "0.3".to_string()));
+                let _ = graph_component.connect_nodes(&sin_id, &mul_id);
+            }
+        }
         let host = cpal::default_host();
         let device = match host.default_output_device() {
             Some(device) => device,
@@ -136,7 +140,7 @@ impl App {
 
         Ok(Self {
             frame_rate,
-            components: vec![Box::new(Home::new()), Box::new(graph_component.clone())],
+            home: Home::new(),
             log_display: LogDisplay::default(),
             should_quit: false,
             should_suspend: false,
@@ -157,15 +161,9 @@ impl App {
             .frame_rate(self.frame_rate);
         tui.enter()?;
 
-        for component in self.components.iter_mut() {
-            component.register_action_handler(self.action_tx.clone())?;
-        }
-        for component in self.components.iter_mut() {
-            component.register_config_handler(self.config.clone())?;
-        }
-        for component in self.components.iter_mut() {
-            component.init(tui.size()?)?;
-        }
+        self.home.register_action_handler(self.action_tx.clone())?;
+        self.home.register_config_handler(self.config.clone())?;
+        self.home.init(tui.size()?)?;
 
         let action_tx = self.action_tx.clone();
         loop {
@@ -198,10 +196,13 @@ impl App {
             Event::Key(key) => self.handle_key_event(key)?,
             _ => {}
         }
-        for component in self.components.iter_mut() {
-            if let Some(action) = component.handle_events(Some(event.clone()))? {
-                action_tx.send(action)?;
+        match self.mode {
+            Mode::Home => {
+                if let Some(action) = self.home.handle_events(Some(event.clone()))? {
+                    action_tx.send(action)?;
+                }
             }
+            Mode::Graph | Mode::GraphEditing => {}
         }
         Ok(())
     }
@@ -286,6 +287,8 @@ impl App {
                 }
                 Action::SwitchMode(mode) => {
                     self.mode = mode;
+                    tui.terminal.clear()?;
+                    info!("Switched to mode: {:?}", mode);
                 }
                 Action::UpdateAudioCode(code) => {
                     if let Ok(mut engine) = self.engine.lock() {
@@ -303,10 +306,13 @@ impl App {
                 }
                 _ => {}
             }
-            for component in self.components.iter_mut() {
-                if let Some(new_action) = component.update(action.clone())? {
-                    self.action_tx.send(new_action)?
-                };
+            match self.mode {
+                Mode::Home => {
+                    if let Some(new_action) = self.home.update(action.clone())? {
+                        self.action_tx.send(new_action)?;
+                    }
+                }
+                Mode::Graph | Mode::GraphEditing => {}
             }
         }
         Ok(())
@@ -321,21 +327,24 @@ impl App {
     fn render(&mut self, tui: &mut Tui) -> Result<()> {
         tui.draw(|frame| {
             let area = frame.area();
-            let graph_area = Rect::new(0, 0, area.width, area.height - 6);
-            let log_area = Rect::new(0, area.height - 6, area.width, 6);
+            let main_area = Rect::new(0, 0, area.width, area.height.saturating_sub(6));
+            let log_area = Rect::new(0, area.height.saturating_sub(6), area.width, 6.min(area.height));
 
-            for component in self.components.iter_mut() {
-                if let Err(err) = component.draw(frame, graph_area) {
-                    let err_msg = format!("Failed to draw: {:?}", err);
-                    self.log_display.add_error(err_msg.clone());
-                    let _ = self.action_tx.send(Action::Error(err_msg));
+            match self.mode {
+                Mode::Home => {
+                    if let Err(err) = self.home.draw(frame, main_area) {
+                        let err_msg = format!("Failed to draw home: {:?}", err);
+                        self.log_display.add_error(err_msg.clone());
+                        let _ = self.action_tx.send(Action::Error(err_msg));
+                    }
                 }
-            }
-
-            if let Err(err) = self.graph_component.draw(frame, graph_area) {
-                let err_msg = format!("Failed to draw graph: {:?}", err);
-                self.log_display.add_error(err_msg.clone());
-                let _ = self.action_tx.send(Action::Error(err_msg));
+                Mode::Graph | Mode::GraphEditing => {
+                    if let Err(err) = self.graph_component.draw(frame, main_area) {
+                        let err_msg = format!("Failed to draw graph: {:?}", err);
+                        self.log_display.add_error(err_msg.clone());
+                        let _ = self.action_tx.send(Action::Error(err_msg));
+                    }
+                }
             }
 
             if let Err(err) = self.log_display.draw(frame, log_area) {
