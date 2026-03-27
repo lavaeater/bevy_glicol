@@ -1,5 +1,9 @@
 # TUI Glicol
 
+## My Notes
+Phase 2 — Graph::to_glicol_code() and wiring it into the engine.
+"TUI Glicol project status — Phase 1 complete, ready for Phase 2"
+
 A terminal user interface for the [Glicol](https://glicol.org/) music engine, built in Rust with `ratatui` and `cpal`.
 
 Glicol uses a node-based DSL to connect oscillators, samples, beats, effects, and math operations into audio graphs. This TUI aims to make that graph live-editable without writing raw Glicol code.
