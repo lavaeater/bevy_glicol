@@ -6,7 +6,7 @@
 //! Press L to cycle through the bundled patches.
 
 use bevy::prelude::*;
-use bevy_glicol::GlicolPlugin;
+use bevy_glicol::prelude::GlicolPlugin;
 use bevy_glicol_ui::{GlicolUiConfig, GlicolUiPlugin, LoadGlicolFile};
 
 const PATCHES: &[&str] = &[
@@ -21,7 +21,7 @@ fn main() {
         .add_plugins(DefaultPlugins.set(WindowPlugin {
             primary_window: Some(Window {
                 title: "Glicol Graph Viewer".into(),
-                resolution: (1400.0, 900.0).into(),
+                resolution: bevy::window::WindowResolution::new(1400_u32, 900_u32),
                 ..default()
             }),
             ..default()

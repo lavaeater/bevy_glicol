@@ -23,7 +23,7 @@ pub struct GraphCanvas;
 
 /// Marks all node card entities so they can be batch-despawned on graph rebuild.
 #[derive(Component)]
-struct GraphCardRoot;
+pub(super) struct GraphCardRoot;
 
 // ── Auto-layout ───────────────────────────────────────────────────────────────
 
