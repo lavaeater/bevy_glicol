@@ -9,3 +9,11 @@ bevy_glicol = { path = "../bevy_glicol" }
 glicol_synth = { git = "https://github.com/lavaeater/glicol", branch = "main" }
 lava_ui_builder = { path = "../lava_ui_builder" }
 serde = { version = "1", features = ["derive"] }
+
+[dev-dependencies]
+bevy = { version = "0.18.0", default-features = true }
+bevy_glicol = { path = "../bevy_glicol" }
+
+[[example]]
+name = "graph_viewer"
+path = "examples/graph_viewer.rs"
