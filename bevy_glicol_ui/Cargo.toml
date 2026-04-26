@@ -1,0 +1,11 @@
+[package]
+name = "bevy_glicol_ui"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+bevy = { version = "0.18.0", default-features = false, features = ["ui", "asset_processor"] }
+bevy_glicol = { path = "../bevy_glicol" }
+glicol_synth = { git = "https://github.com/lavaeater/glicol", branch = "main" }
+lava_ui_builder = { path = "../lava_ui_builder" }
+serde = { version = "1", features = ["derive"] }
